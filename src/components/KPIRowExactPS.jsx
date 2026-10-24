@@ -114,61 +114,62 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Top Banner with Total Collateral */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: 12,
-        padding: '12px 18px',
+        gap: 14,
+        padding: '16px 24px',
         background: 'linear-gradient(90deg, #ffffff 0%, #fdfbf7 100%)',
         border: '1px solid var(--border-subtle)',
         borderRadius: 'var(--radius-md)',
         boxShadow: 'var(--shadow-sm)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
-            width: 38,
-            height: 38,
+            width: 44,
+            height: 44,
             borderRadius: 'var(--radius-sm)',
             background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)',
             border: '1px solid var(--color-amber-border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--color-amber-600)'
+            color: 'var(--color-amber-600)',
+            boxShadow: '0 2px 6px rgba(245, 158, 11, 0.12)'
           }}>
-            <IndianRupee size={20} />
+            <IndianRupee size={22} />
           </div>
           <div>
-            <span className="serif-heading" style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink-primary)' }}>
+            <span className="serif-heading" style={{ fontSize: 19, fontWeight: 700, color: 'var(--ink-primary)' }}>
               Instrument Lifecycle Overview
             </span>
-            <div style={{ fontSize: 12.5, color: 'var(--ink-muted)', marginTop: 2 }}>
+            <div style={{ fontSize: 13, color: 'var(--ink-muted)', marginTop: 2 }}>
               Tracking {records.length} technical institutions across India (APH 2024-27 Table 1.4)
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 11, color: 'var(--ink-muted)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.03em' }}>
+            <div style={{ fontSize: 11.5, color: 'var(--ink-muted)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em' }}>
               Total Guaranteed Collateral
             </div>
-            <div className="mono" style={{ fontWeight: 800, fontSize: 20, color: 'var(--ink-primary)', marginTop: 2 }}>
-              ₹ {totalCrores} <span style={{ fontSize: 13, color: 'var(--color-amber-600)', fontWeight: 600 }}>Crores</span>
+            <div className="mono" style={{ fontWeight: 800, fontSize: 22, color: 'var(--ink-primary)', marginTop: 2 }}>
+              ₹ {totalCrores} <span style={{ fontSize: 14, color: 'var(--color-amber-600)', fontWeight: 600 }}>Crores</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Colorful 7 KPI Tiles - Fixed Single Row */}
+      {/* Colorful 7 KPI Tiles - Fixed Single Row with Roomy, Uncompacted Dimensions */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-        gap: 12,
+        gap: 14,
         width: '100%'
       }}>
         {kpis.map(tile => {
@@ -183,14 +184,14 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
                 background: isSelected ? 'var(--bg-muted)' : tile.cardBg,
                 border: isSelected ? '2px solid var(--ink-primary)' : `1px solid ${tile.borderColor}`,
                 borderRadius: 'var(--radius-md)',
-                padding: '14px 14px',
+                padding: '18px 18px',
                 textAlign: 'left',
                 cursor: 'pointer',
                 transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 8,
-                minHeight: 110,
+                gap: 10,
+                minHeight: 136,
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: isSelected ? '0 4px 14px rgba(0,0,0,0.1)' : 'var(--shadow-sm)'
@@ -219,13 +220,13 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
               }} />
 
               {/* Title & Icon */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 6 }}>
                 <span style={{
-                  fontSize: 11,
+                  fontSize: 12.5,
                   fontWeight: 700,
                   color: tile.iconColor,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.03em',
+                  letterSpacing: '0.04em',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
@@ -234,8 +235,8 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
                 </span>
 
                 <div style={{
-                  width: 26,
-                  height: 26,
+                  width: 32,
+                  height: 32,
                   borderRadius: '50%',
                   background: tile.iconBg,
                   display: 'flex',
@@ -244,20 +245,20 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
                   color: tile.iconColor,
                   flexShrink: 0
                 }}>
-                  <Icon size={14} />
+                  <Icon size={17} />
                 </div>
               </div>
 
               {/* Number Count */}
-              <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: 'var(--ink-primary)', lineHeight: 1 }}>
+              <div className="mono" style={{ fontSize: 32, fontWeight: 800, color: 'var(--ink-primary)', lineHeight: 1, margin: '2px 0' }}>
                 {tile.count}
               </div>
 
               {/* Description */}
               <div style={{
-                fontSize: 11,
+                fontSize: 12,
                 color: 'var(--ink-secondary)',
-                lineHeight: 1.25,
+                lineHeight: 1.35,
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis'

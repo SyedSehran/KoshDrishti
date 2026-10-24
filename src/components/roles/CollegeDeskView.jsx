@@ -31,10 +31,16 @@ export default function CollegeDeskView({
 
   const handleProgramSelect = (prog) => {
     setSelectedProgram(prog);
-    const norm = APH_CONFIG.table1_4.find(n => n.program === prog);
-    if (norm) {
-      setAmount(norm.minAmount);
-      setTenorYears(norm.tenorYears);
+    try {
+      const calc = APH_CONFIG.calculateRequirement(prog);
+      setAmount(calc.minAmount);
+      setTenorYears(calc.tenorYears);
+    } catch {
+      const norm = APH_CONFIG.table1_4.find(n => n.program === prog);
+      if (norm) {
+        setAmount(norm.minAmount);
+        setTenorYears(norm.tenorYears);
+      }
     }
   };
 

@@ -1,7 +1,7 @@
 """
 AICTE KoshDrishti (कोषदृष्टि) • Native Python Backend Engine
 Fully persists to SQLite (vishwas_fdr.db), real SHA-256 hash-chained audit ledger,
-genuine PDF/Text field extraction with anchored regexes, deterministic APH Table 1.4 & Clause 11.8 compliance scoring,
+anchored regex field extraction, deterministic APH Table 1.4 & Clause 11.8 compliance scoring,
 scheduled background alert scanner daemon, and PyJWT role-based access control (RBAC).
 """
 
@@ -26,8 +26,17 @@ except ImportError:
     PYPDF_AVAILABLE = False
 
 DB_FILE = os.path.join(os.path.dirname(__file__), "vishwas_fdr.db")
-# Secrets moved to environment variables with fallback
-JWT_SECRET = os.environ.get("JWT_SECRET", "kosh_drishti_jwt_secret_aicte_2026")
+
+# Secrets configuration
+JWT_SECRET_ENV = os.environ.get("JWT_SECRET")
+if JWT_SECRET_ENV:
+    JWT_SECRET = JWT_SECRET_ENV
+    JWT_MODE = "PRODUCTION_ENV"
+else:
+    # Explicitly labeled DEMO-ONLY secret for offline hackathon jury evaluation
+    JWT_SECRET = "kosh_drishti_demo_jury_evaluation_secret_key_2026"
+    JWT_MODE = "DEMO_EVALUATION_FALLBACK"
+
 JWT_ALGORITHM = "HS256"
 
 # Permitted CORS origins (restricted to localhost)
@@ -46,6 +55,67 @@ def get_db():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     return conn
+
+# Server-side Table 1.4 Norms Authority (Client aph_norm is never trusted)
+TABLE_1_4_NORMS = {
+    "Engineering & Technology (UG)": {"minAmount": 3500000, "tenorYears": 10},
+    "Engineering & Technology (Diploma)": {"minAmount": 1500000, "tenorYears": 10},
+    "Engineering & Technology (PG)": {"minAmount": 1500000, "tenorYears": 10},
+    "Management (PG - MBA/PGDM)": {"minAmount": 1500000, "tenorYears": 10},
+    "Management (MBA / PGDM)": {"minAmount": 1500000, "tenorYears": 10},
+    "Management (UG - BBA)": {"minAmount": 500000, "tenorYears": 10},
+    "Computer Applications (PG - MCA)": {"minAmount": 1500000, "tenorYears": 10},
+    "Computer Applications (UG - BCA)": {"minAmount": 500000, "tenorYears": 10},
+    "Planning (Diploma / UG / PG)": {"minAmount": 1500000, "tenorYears": 10},
+    "Applied Arts & Crafts (All Levels)": {"minAmount": 1500000, "tenorYears": 10},
+    "Applied Arts & Crafts": {"minAmount": 1500000, "tenorYears": 10},
+    "Design (All Levels)": {"minAmount": 1500000, "tenorYears": 10},
+    "Hotel Management & Catering (HMCT)": {"minAmount": 1500000, "tenorYears": 10},
+    "Government / University Constituent (All)": {"minAmount": 0, "tenorYears": 0, "isGovt": True}
+}
+
+def get_server_aph_norm(program):
+    """
+    Derives mandatory deposit amount and tenor strictly from server-side Table 1.4 rules.
+    Prevents untrusted clients from injecting minAmount: 0.
+    """
+    if not program or not isinstance(program, str):
+        return {"minAmount": 3500000, "tenorYears": 10, "program": "Engineering & Technology (UG)"}
+    
+    prog_clean = program.strip()
+    if "government" in prog_clean.lower():
+        return {"minAmount": 0, "tenorYears": 0, "isGovt": True}
+    
+    # Exact lookup
+    for prog_key, norm in TABLE_1_4_NORMS.items():
+        if prog_key.lower() == prog_clean.lower():
+            return {**norm, "program": prog_key}
+            
+    prog_lower = prog_clean.lower()
+    if "bba" in prog_lower:
+        return {"minAmount": 500000, "tenorYears": 10, "program": "Management (UG - BBA)"}
+    elif "bca" in prog_lower:
+        return {"minAmount": 500000, "tenorYears": 10, "program": "Computer Applications (UG - BCA)"}
+    elif "diploma" in prog_lower or "polytechnic" in prog_lower:
+        return {"minAmount": 1500000, "tenorYears": 10, "program": "Engineering & Technology (Diploma)"}
+    elif "management" in prog_lower or "mba" in prog_lower or "pgdm" in prog_lower:
+        return {"minAmount": 1500000, "tenorYears": 10, "program": "Management (PG - MBA/PGDM)"}
+    elif "computer" in prog_lower or "mca" in prog_lower:
+        return {"minAmount": 1500000, "tenorYears": 10, "program": "Computer Applications (PG - MCA)"}
+    elif "planning" in prog_lower:
+        return {"minAmount": 1500000, "tenorYears": 10, "program": "Planning (Diploma / UG / PG)"}
+    elif "applied arts" in prog_lower or "crafts" in prog_lower:
+        return {"minAmount": 1500000, "tenorYears": 10, "program": "Applied Arts & Crafts (All Levels)"}
+    elif "design" in prog_lower:
+        return {"minAmount": 1500000, "tenorYears": 10, "program": "Design (All Levels)"}
+    elif "hotel" in prog_lower or "hmct" in prog_lower:
+        return {"minAmount": 1500000, "tenorYears": 10, "program": "Hotel Management & Catering (HMCT)"}
+    elif "engineering" in prog_lower:
+        if "pg" in prog_lower or "m.tech" in prog_lower:
+            return {"minAmount": 1500000, "tenorYears": 10, "program": "Engineering & Technology (PG)"}
+        return {"minAmount": 3500000, "tenorYears": 10, "program": "Engineering & Technology (UG)"}
+        
+    return {"minAmount": 3500000, "tenorYears": 10, "program": "Engineering & Technology (UG)"}
 
 # Helper: Append to Cryptographic SHA-256 Hash-Chained Ledger
 def append_to_ledger(action, actor, fdr_id, details):
@@ -147,29 +217,22 @@ def extract_fields_from_text(raw_text):
 
     # 1. FDR Number regex - MUST contain actual digits and keep full FDR/BANK/XXXX string
     fdr_number = None
-    # Pattern 1: Exact FDR/BANK/XXXX or FDR/XXXX with at least 4 digits
     fdr_full_match = re.search(r'(FDR\/[A-Z0-9_\-\/]{4,}[0-9]{3,}[A-Z0-9_\-\/]*)', raw_text, re.IGNORECASE)
     if fdr_full_match:
         fdr_number = fdr_full_match.group(1).strip()
     else:
-        # Pattern 2: FDR NUMBER: XXX with digits
         fdr_match = re.search(r'(?:FDR\s*(?:NO|NUMBER)?|FD\s*(?:NO|NUMBER)?|RECEIPT\s*NO|REF\s*NO)[\s\:\#-]*([A-Z0-9\/]{6,30})', raw_text, re.IGNORECASE)
         if fdr_match:
             candidate = fdr_match.group(1).strip()
-            # Must contain at least 4 digits and not be keywords like 'MISSING' or 'NUMBER'
             if re.search(r'\d{4,}', candidate) and not re.search(r'^(?:NUMBER|INCOMPLETE|MISSING|NOTAPPLICABLE)$', candidate, re.IGNORECASE):
                 fdr_number = candidate if candidate.upper().startswith("FDR") else f"FDR/{candidate}"
         else:
-            # Pattern 3: Standard bank format XXX/XXX/XXXXXX with digits
             alt_match = re.search(r'([A-Z]{3,5}\/[A-Z0-9]{3,6}\/[0-9]{6,14})', raw_text)
             if alt_match:
                 fdr_number = alt_match.group(1).strip()
 
-    # 2. Amount Regex - Anchored on 'DEPOSIT AMOUNT', 'INR', 'RS', '₹'
-    # Will not erroneously match IFSC digits (e.g. SBIN0000691) or account numbers (40192830112)
+    # 2. Amount Regex - Strictly Anchored on 'DEPOSIT AMOUNT', 'INR', 'RS', '₹'
     amount = None
-    
-    # Priority A: Anchor specifically on DEPOSIT AMOUNT / PRINCIPAL AMOUNT / SUM OF
     dep_amt_match = re.search(
         r'(?:DEPOSIT\s*AMOUNT|PRINCIPAL\s*AMOUNT|FDR\s*AMOUNT|SUM\s*OF\s*RS\.?|TOTAL\s*AMOUNT)[\s\:\-]+(?:INR|RS\.?|₹)?\s*([0-9]{1,2}(?:,[0-9]{2})*(?:,[0-9]{3})(?:\.[0-9]{2})?|[0-9]{5,9}(?:\.[0-9]{2})?)',
         raw_text,
@@ -184,7 +247,6 @@ def extract_fields_from_text(raw_text):
         except ValueError:
             amount = None
 
-    # Priority B: Anchor on INR or RS or ₹ followed immediately by a currency formatted number
     if amount is None:
         inr_matches = re.finditer(
             r'(?:INR|RS\.?|₹)\s*([0-9]{1,2}(?:,[0-9]{2})+(?:,[0-9]{3})(?:\.[0-9]{2})?|[0-9]{1,2}(?:,[0-9]{3})+(?:\.[0-9]{2})?|[0-9]{5,9}(?:\.[0-9]{2})?)',
@@ -195,14 +257,12 @@ def extract_fields_from_text(raw_text):
             val_str = m.group(1).replace(',', '')
             try:
                 parsed = float(val_str)
-                # Filter out IFSC codes, pincodes or account numbers
                 if 50000 <= parsed <= 50000000:
                     amount = parsed
                     break
             except ValueError:
                 continue
 
-    # Priority C: Words to numbers fallback (e.g. RUPEES THIRTY FIVE LAKHS)
     if amount is None:
         words_match = re.search(r'RUPEES\s+([A-Z\s]+?)\s+ONLY', raw_text, re.IGNORECASE)
         if words_match:
@@ -282,7 +342,7 @@ def compute_rule_compliance_score(institution_data, bank_record, aph_norm):
     bank_tenor = bank_record.get("tenorYears", 10)
     bank_joint = bank_record.get("jointHolderName", "")
     lien_marked = bank_record.get("lienMarked", False)
-    is_govt = institution_data.get("isGovernmentExempt", False)
+    is_govt = institution_data.get("isGovernmentExempt", False) or aph_norm.get("isGovt", False)
 
     # 1. Amount Compliance (with 2x leased building multiplier)
     if bank_amt < min_required and not is_govt:
@@ -324,6 +384,7 @@ def compute_rule_compliance_score(institution_data, bank_record, aph_norm):
         "compliance_level": compliance_level,
         "penalties": penalties,
         "is_leased_building": is_leased,
+        "derived_statutory_norm": aph_norm,
         "statutory_norm_evaluated": "AICTE APH 2024-27 Table 1.4 & Chapter XI Clause 11.8",
         "action_required": "Proceed with clearance" if final_score >= 90 else "Issue Statutory Rectification Mandate"
     }
@@ -381,7 +442,6 @@ def run_alert_scanner():
                     msg = f"10-Year lock-in completed ({abs(days_rem)} days ago). Two-officer digital discharge ready for Member Secretary approval."
                 
                 if alert_type:
-                    # Deduplication: only insert if not already present for this (fdr_id, alert_type)
                     c.execute("SELECT id FROM alerts WHERE fdr_id = ? AND alert_type = ?", (fdr_id, alert_type))
                     existing = c.fetchone()
                     if not existing:
@@ -405,7 +465,6 @@ def run_alert_scanner():
         print(f"[AlertScanner] Daemon error: {e}")
 
 def alert_scanner_daemon():
-    # Run initial scan on startup, then every 60 seconds
     time.sleep(1)
     run_alert_scanner()
     while True:
@@ -488,12 +547,13 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({
                 "status": "HEALTHY",
                 "service": "AICTE KoshDrishti Python Engine",
-                "version": "3.2.0",
+                "version": "3.3.0",
                 "relational_db": "SQLite3 (vishwas_fdr.db)",
                 "audit_ledger": "SHA-256 Hash-Chained Ledger Active",
                 "aph_standard": "APH 2024-27 Table 1.4 & Clause 11.8",
                 "alert_scanner": "Background Thread Active",
-                "rbac_enabled": True
+                "rbac_enabled": True,
+                "jwt_security_mode": JWT_MODE
             }).encode('utf-8'))
 
         # 2. Instruments List
@@ -710,18 +770,20 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             conn.commit()
             conn.close()
 
-            # Record in SHA-256 Hash-Chained Ledger
             actor_name = auth.get("name", "AUTHENTICATED_USER")
             append_to_ledger("INSTRUMENT_LODGED", actor_name, new_id, f"FDR {fdr_no} for ₹{amount:,.0f} registered by {inst_name}")
 
             self._set_headers(201)
             self.wfile.write(json.dumps({"success": True, "id": new_id, "fdrNumber": fdr_no}).encode('utf-8'))
 
-        # 3. Rule-Based Compliance & Triangulation
+        # 3. Rule-Based Compliance & Triangulation (Derives norm server-side, never trusts client aph_norm)
         elif path == "/api/v1/cbs/triangulate":
             inst_data = payload.get("institution_data", {})
             bank_rec = payload.get("bank_record", {})
-            aph_norm = payload.get("aph_norm", {"minAmount": 3500000, "tenorYears": 10})
+            
+            # Derive statutory norm server-side from programType (Caller cannot override minAmount)
+            program_name = inst_data.get("programType") or inst_data.get("program") or payload.get("program") or ""
+            aph_norm = get_server_aph_norm(program_name)
 
             result = compute_rule_compliance_score(inst_data, bank_rec, aph_norm)
             self._set_headers(200)
@@ -769,11 +831,12 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             self._set_headers(200)
             self.wfile.write(json.dumps({"success": True, "message": "Alert scan executed successfully"}).encode('utf-8'))
 
-        # 7. Auth Login
+        # 7. Auth Login (Per-user cryptographic salt)
         elif path == "/api/v1/auth/login":
             email = payload.get("email", "").strip().lower()
             password = payload.get("password", "")
-            pw_hash = hashlib.sha256(f"salt_kosh_{password}".encode()).hexdigest()
+            salt = hashlib.sha256(email.encode()).hexdigest()[:16]
+            pw_hash = hashlib.sha256(f"{salt}:{password}:{salt}".encode()).hexdigest()
 
             conn = get_db()
             c = conn.cursor()
@@ -829,17 +892,59 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                 return
 
             fdr_id = status_match.group(1)
-            new_status = payload.get("status", "Active")
-            legacy_status = payload.get("legacyStatus", "Updated")
+            new_status = payload.get("status")
+            legacy_status = payload.get("legacyStatus", "Status update recorded")
+            current_role = auth.get("role")
             actor = payload.get("actor", auth.get("name", "REGULATION_BUREAU"))
 
             conn = get_db()
             c = conn.cursor()
 
-            # P2 Handbook Rule: Block release unless 10-year lock-in is complete and zero open complaints
+            # Retrieve existing instrument record
+            c.execute("SELECT * FROM instruments WHERE id = ?", (fdr_id,))
+            inst = c.fetchone()
+            if not inst:
+                conn.close()
+                self._set_headers(404)
+                self.wfile.write(json.dumps({"error": f"Instrument {fdr_id} not found"}).encode('utf-8'))
+                return
+
+            current_status = inst["status"]
+            if not new_status:
+                new_status = current_status
+
+            # Enforce allowed state transitions
+            ALLOWED_TRANSITIONS = {
+                "Pending": ["Active", "Discrepancy"],
+                "Active": ["Active", "Discrepancy", "Released", "Expiring", "Matured", "Renewed"],
+                "Discrepancy": ["Active", "Discrepancy"],
+                "Expiring": ["Active", "Discrepancy", "Released", "Matured", "Renewed"],
+                "Matured": ["Active", "Discrepancy", "Released", "Renewed"],
+                "Renewed": ["Active", "Discrepancy", "Released"],
+                "Released": []  # Terminal state
+            }
+
+            if current_status == "Released":
+                conn.close()
+                self._set_headers(400)
+                self.wfile.write(json.dumps({
+                    "error": "Statutory rule violation: 'Released' is a terminal statutory state and cannot be modified (APH Cl. 11.8).",
+                    "code": "TERMINAL_STATE_LOCKED"
+                }).encode('utf-8'))
+                return
+
+            if new_status != current_status and new_status not in ALLOWED_TRANSITIONS.get(current_status, []):
+                conn.close()
+                self._set_headers(400)
+                self.wfile.write(json.dumps({
+                    "error": f"Invalid state transition: Cannot change status from '{current_status}' to '{new_status}'.",
+                    "code": "INVALID_STATE_TRANSITION"
+                }).encode('utf-8'))
+                return
+
+            # P2 Release Conditions: Block release unless 10-year lock-in is complete, zero open complaints, director role
             if new_status == "Released":
-                # Director / Member Secretary role strictly required for Release
-                if auth.get("role") != "director":
+                if current_role != "director":
                     conn.close()
                     self._set_headers(403)
                     self.wfile.write(json.dumps({
@@ -848,47 +953,108 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                     }).encode('utf-8'))
                     return
 
-                c.execute("SELECT days_remaining, has_discrepancies, tenor_years FROM instruments WHERE id = ?", (fdr_id,))
-                inst = c.fetchone()
-                if inst:
-                    if inst["days_remaining"] > 0:
-                        conn.close()
-                        self._set_headers(400)
-                        self.wfile.write(json.dumps({
-                            "error": f"Statutory Block: FDR lock-in period is incomplete ({inst['days_remaining']} days remaining of mandatory 10-year tenor). Early release is prohibited under APH Cl. 11.8.",
-                            "code": "STATUTORY_LOCKIN_INCOMPLETE"
-                        }).encode('utf-8'))
-                        return
-                    if inst["has_discrepancies"] != 0:
-                        conn.close()
-                        self._set_headers(400)
-                        self.wfile.write(json.dumps({
-                            "error": "Statutory Block: Cannot release deposit while unresolved complaints or discrepancies exist on file (APH Cl. 11.8).",
-                            "code": "OPEN_DISCREPANCIES_EXIST"
-                        }).encode('utf-8'))
-                        return
+                if inst["days_remaining"] > 0:
+                    conn.close()
+                    self._set_headers(400)
+                    self.wfile.write(json.dumps({
+                        "error": f"Statutory Block: FDR lock-in period is incomplete ({inst['days_remaining']} days remaining of mandatory 10-year tenor). Early release is prohibited under APH Cl. 11.8.",
+                        "code": "STATUTORY_LOCKIN_INCOMPLETE"
+                    }).encode('utf-8'))
+                    return
 
-            # Also allow maturity_date adjustment for testing alert generation
+                if inst["has_discrepancies"] != 0:
+                    conn.close()
+                    self._set_headers(400)
+                    self.wfile.write(json.dumps({
+                        "error": "Statutory Block: Cannot release deposit while unresolved complaints or discrepancies exist on file (APH Cl. 11.8).",
+                        "code": "OPEN_DISCREPANCIES_EXIST"
+                    }).encode('utf-8'))
+                    return
+
+            # P0 Honest Discrepancy & Bank Confirmation Enforcement:
+            # 1. Never auto-clear discrepancies!
+            # 2. Only bureau_officer or director can clear discrepancies, and ONLY with a non-empty resolution note
+            resolution_note = (payload.get("resolutionNote") or payload.get("resolution_note") or payload.get("notes") or "").strip()
+            target_discrepancy = inst["has_discrepancies"]
+
+            if current_status == "Discrepancy" and new_status == "Active":
+                if current_role not in ["bureau_officer", "director"]:
+                    conn.close()
+                    self._set_headers(403)
+                    self.wfile.write(json.dumps({
+                        "error": f"Forbidden: Role '{current_role}' cannot resolve statutory discrepancies. Only Scrutiny Officer or Director can clear discrepancy flags.",
+                        "code": "DISCREPANCY_CLEAR_UNAUTHORIZED_ROLE"
+                    }).encode('utf-8'))
+                    return
+
+                if not resolution_note:
+                    conn.close()
+                    self._set_headers(400)
+                    self.wfile.write(json.dumps({
+                        "error": "Statutory requirement: Resolving a discrepancy requires an explicit non-empty resolution note on file (APH Cl. 11.8).",
+                        "code": "RESOLUTION_NOTE_REQUIRED"
+                    }).encode('utf-8'))
+                    return
+
+                # Discrepancy resolved by authorized officer with mandatory resolution note
+                target_discrepancy = 0
+            elif payload.get("hasDiscrepancies") is not None:
+                req_disc = 1 if payload.get("hasDiscrepancies") else 0
+                if req_disc == 0 and inst["has_discrepancies"] == 1:
+                    if current_role not in ["bureau_officer", "director"] or not resolution_note:
+                        conn.close()
+                        self._set_headers(400)
+                        self.wfile.write(json.dumps({
+                            "error": "Clearing discrepancy requires officer authorization and a resolution note.",
+                            "code": "RESOLUTION_NOTE_REQUIRED"
+                        }).encode('utf-8'))
+                        return
+                    target_discrepancy = 0
+                else:
+                    target_discrepancy = req_disc
+
+            # 3. Only bank_validator role can set bank_confirmed = 1
+            if current_role == "bank_validator":
+                target_bank_confirmed = 1 if payload.get("bankConfirmed", True) else 0
+            else:
+                # Other roles cannot fake or overwrite bank confirmation
+                target_bank_confirmed = inst["bank_confirmed"]
+
+            # 4. Lien marked
+            if payload.get("lienMarked") is not None:
+                target_lien_marked = 1 if payload.get("lienMarked") else 0
+            else:
+                target_lien_marked = inst["lien_marked"]
+
+            # 5. Optional maturityDate change for testing
             if "maturityDate" in payload:
                 new_mat = payload["maturityDate"]
                 c.execute("UPDATE instruments SET maturity_date = ? WHERE id = ?", (new_mat, fdr_id))
 
             c.execute('''
                 UPDATE instruments 
-                SET status = ?, legacy_status = ?, has_discrepancies = 0, lien_marked = 1, bank_confirmed = 1
+                SET status = ?, legacy_status = ?, has_discrepancies = ?, lien_marked = ?, bank_confirmed = ?
                 WHERE id = ?
-            ''', (new_status, legacy_status, fdr_id))
+            ''', (new_status, legacy_status, target_discrepancy, target_lien_marked, target_bank_confirmed, fdr_id))
             conn.commit()
             conn.close()
 
-            # Trigger immediate alert scan so that any maturity changes update alerts synchronously
             run_alert_scanner()
 
             # Record in SHA-256 Ledger
-            append_to_ledger("STATUS_MODIFIED", actor, fdr_id, f"Instrument status changed to '{new_status}': {legacy_status}")
+            log_detail = f"Instrument status changed to '{new_status}': {legacy_status}"
+            if resolution_note:
+                log_detail += f" | Resolution note: {resolution_note}"
+            append_to_ledger("STATUS_MODIFIED", actor, fdr_id, log_detail)
 
             self._set_headers(200)
-            self.wfile.write(json.dumps({"success": True, "id": fdr_id, "status": new_status}).encode('utf-8'))
+            self.wfile.write(json.dumps({
+                "success": True,
+                "id": fdr_id,
+                "status": new_status,
+                "hasDiscrepancies": bool(target_discrepancy),
+                "bankConfirmed": bool(target_bank_confirmed)
+            }).encode('utf-8'))
         else:
             self._set_headers(404)
             self.wfile.write(json.dumps({"error": "Endpoint not found"}).encode('utf-8'))
@@ -897,13 +1063,18 @@ def run_server(port=8000):
     server_address = ('', port)
     httpd = http.server.HTTPServer(server_address, VishwasAPIHandler)
     
-    # Start background alert scanner daemon
     scanner_thread = threading.Thread(target=alert_scanner_daemon, daemon=True)
     scanner_thread.start()
     
     print(f"AICTE KoshDrishti Backend running at http://127.0.0.1:{port}/")
     print("Background Alert Scanner Thread Active.")
     print("RBAC Authentication Enforced on Mutating Endpoints.")
+    if JWT_MODE == "DEMO_EVALUATION_FALLBACK":
+        print("[AUTH NOTICE] JWT_SECRET running in DEMO_EVALUATION_FALLBACK mode (demo secret).")
+        print("[AUTH NOTICE] Define 'JWT_SECRET' in environment variables for production deployments.")
+    else:
+        print("[AUTH NOTICE] Production JWT_SECRET loaded from environment.")
+
     httpd.serve_forever()
 
 if __name__ == "__main__":

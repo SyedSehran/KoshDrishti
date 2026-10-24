@@ -142,15 +142,16 @@ def seed_database():
         )
     ''')
 
-    # Seed demo users (Password: RoleName@123)
-    def hash_pw(pw):
-        return hashlib.sha256(f"salt_kosh_{pw}".encode()).hexdigest()
+    # Seed demo users with per-user dynamic cryptographic salt
+    def hash_pw(email, pw):
+        salt = hashlib.sha256(email.strip().lower().encode()).hexdigest()[:16]
+        return hashlib.sha256(f"{salt}:{pw}:{salt}".encode()).hexdigest()
 
     demo_users = [
-        ("officer@aicte.gov.in", hash_pw("Officer@123"), "Rajesh Sharma", "bureau_officer", "Regulation Bureau"),
-        ("director@aicte.gov.in", hash_pw("Director@123"), "Prof. Rajive Kumar", "director", "Member Secretary AICTE"),
-        ("college@kalinga.edu.in", hash_pw("College@123"), "Dr. S. Mohanty", "institution", "Kalinga Institute Desk"),
-        ("validator@sbi.co.in", hash_pw("Bank@123"), "A. K. Verma", "bank_validator", "SBI Branch Operations")
+        ("officer@aicte.gov.in", hash_pw("officer@aicte.gov.in", "Officer@123"), "Rajesh Sharma", "bureau_officer", "Regulation Bureau"),
+        ("director@aicte.gov.in", hash_pw("director@aicte.gov.in", "Director@123"), "Prof. Rajive Kumar", "director", "Member Secretary AICTE"),
+        ("college@kalinga.edu.in", hash_pw("college@kalinga.edu.in", "College@123"), "Dr. S. Mohanty", "institution", "Kalinga Institute Desk"),
+        ("validator@sbi.co.in", hash_pw("validator@sbi.co.in", "Bank@123"), "A. K. Verma", "bank_validator", "SBI Branch Operations")
     ]
 
     for email, pw_hash, name, role, dept in demo_users:
@@ -224,14 +225,14 @@ def seed_database():
         )
     ''')
 
-    # 5. Symbiosis (Expiring in 27 days)
+    # 5. Symbiosis (Expiring in 27 days - Management PG per Table 1.4 is ₹15L, 10-Year Tenor)
     c.execute('''
         INSERT INTO instruments VALUES (
             'FDR-2018-1005', 'FDR/HDFC/883920191', '1-10492814',
             'Symbiosis Institute of Business & Digital Media', 'Symbiosis International Society',
             'Western', 'Maharashtra', 'Pune', 'Management (MBA / PGDM)',
-            2500000, 'HDFC Bank', 'Private Sector Scheduled', 'HDFC0001092',
-            '40192830115', '2018-11-20', '2026-11-20', 8, 27,
+            1500000, 'HDFC Bank', 'Private Sector Scheduled', 'HDFC0001092',
+            '40192830115', '2016-11-20', '2026-11-20', 10, 27,
             'Member Secretary, AICTE & President, Symbiosis', 1, 1, 'bank', 99.1,
             'Expiring', 'Expiring in 27 days (Advisory Dispatched)', 0, 'APH Table 1.4 Deposit for Management (MBA / PGDM)', 0, datetime('now')
         )

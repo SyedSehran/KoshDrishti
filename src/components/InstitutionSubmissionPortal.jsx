@@ -6,6 +6,7 @@ import {
   AlertTriangle, 
   ShieldCheck 
 } from 'lucide-react';
+import { APH_CONFIG } from '../config/aph';
 import { APH_NORMS_CATALOG } from '../data/mockData';
 
 export default function InstitutionSubmissionPortal({ onAddNewFDR }) {
@@ -31,10 +32,16 @@ export default function InstitutionSubmissionPortal({ onAddNewFDR }) {
 
   const handleProgramChange = (prog) => {
     setSelectedProgram(prog);
-    const norm = APH_NORMS_CATALOG.find(n => n.program === prog);
-    if (norm) {
-      setDepositAmount(norm.minAmountLakhs * 100000);
-      setTenorYears(norm.lockInYears);
+    try {
+      const calc = APH_CONFIG.calculateRequirement(prog);
+      setDepositAmount(calc.minAmount);
+      setTenorYears(calc.tenorYears);
+    } catch {
+      const norm = APH_NORMS_CATALOG.find(n => n.program === prog);
+      if (norm) {
+        setDepositAmount(norm.minAmountLakhs * 100000);
+        setTenorYears(norm.lockInYears);
+      }
     }
   };
 

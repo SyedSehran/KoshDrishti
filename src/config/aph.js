@@ -246,11 +246,20 @@ export const APH_CONFIG = {
    * @param {boolean} isGovtExempt - True if 100% government funded
    */
   calculateRequirement(program, isLeasedBuilding = false, isGovtExempt = false) {
-    if (isGovtExempt || program.includes("Government")) {
-      return { minAmount: 0, minAmountLakhs: 0, tenorYears: 0, isExempt: true, multiplier: 1 };
+    if (isGovtExempt || program === "GOVT_EXEMPT" || (typeof program === 'string' && program.startsWith("Government"))) {
+      return { minAmount: 0, minAmountLakhs: 0, tenorYears: 0, isExempt: true, multiplier: 1, baseLakhs: 0, isLeasedApplied: false };
     }
 
-    const norm = this.table1_4.find(n => n.program === program || program.includes(n.category)) || this.table1_4[0];
+    if (!program || typeof program !== 'string') {
+      throw new Error("Invalid program identifier: program parameter is required");
+    }
+
+    // Exact match on id or exact program name (No loose substring matching)
+    const norm = this.table1_4.find(n => n.id === program || n.program === program);
+    if (!norm) {
+      throw new Error(`Unknown program: "${program}" is not in Table 1.4 (Pharmacy & Architecture are governed by PCI/CoA, not in AICTE Table 1.4).`);
+    }
+
     const multiplier = isLeasedBuilding ? this.leasedBuildingMultiplier : 1;
     const baseLakhs = norm.minAmountLakhs;
     const finalLakhs = baseLakhs * multiplier;
@@ -258,11 +267,13 @@ export const APH_CONFIG = {
     return {
       minAmount: finalLakhs * 100000,
       minAmountLakhs: finalLakhs,
-      tenorYears: this.mandatoryTenorYears,
+      tenorYears: norm.tenorYears || this.mandatoryTenorYears,
       isExempt: false,
       multiplier,
       baseLakhs,
-      isLeasedApplied: isLeasedBuilding
+      isLeasedApplied: Boolean(isLeasedBuilding),
+      programId: norm.id,
+      programName: norm.program
     };
   }
 };

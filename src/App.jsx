@@ -231,7 +231,7 @@ export default function App() {
       />
 
       {/* Main Canvas Container */}
-      <main style={{ flex: 1, padding: '28px 32px', maxWidth: 1560, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 28 }}>
+      <main style={{ flex: 1, padding: '28px 36px', maxWidth: 1760, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 28 }}>
 
 
         {/* ROLE 1: Approving Authority / Director View */}
