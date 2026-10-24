@@ -225,40 +225,7 @@ export default function App() {
 
       {/* Main Canvas Container */}
       <main style={{ flex: 1, padding: '28px 32px', maxWidth: 1560, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 28 }}>
-        {/* Transparent Regulatory Disclosure Banner */}
-        <div style={{
-          background: 'var(--bg-muted)',
-          border: '1px solid var(--border-medium)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '10px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: 12.5,
-          color: 'var(--ink-secondary)'
-        }}>
-          <div>
-            <strong>Regulatory Standard:</strong> Modelled strictly on{' '}
-            <span style={{ fontWeight: 600, color: 'var(--ink-primary)' }}>
-              AICTE Approval Process Handbook (APH 2024-27 Table 1.4)
-            </span>{' '}
-            & RBI Scheduled Commercial Banks Registry.
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ color: 'var(--stamp-bank-color)', fontWeight: 600 }}>
-              Bank verification (simulated)
-            </span>
-            <span>•</span>
-            <button
-              onClick={() => setIsDemoScriptsOpen(true)}
-              className="btn btn-paper btn-sm"
-              style={{ padding: '2px 8px', fontSize: 11 }}
-            >
-              <Award size={12} />
-              <span>3 Demo Scripts</span>
-            </button>
-          </div>
-        </div>
+
 
         {/* ROLE 1: Approving Authority / Director View */}
         {currentRole === 'director' && (

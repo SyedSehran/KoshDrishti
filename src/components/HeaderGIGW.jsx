@@ -155,93 +155,70 @@ export default function HeaderGIGW({
         background: 'linear-gradient(90deg, #f97316 0%, #f59e0b 25%, #ffffff 48%, #0ea5e9 52%, #10b981 75%, #059669 100%)'
       }} />
 
-      {/* 2. Simplified Main Header Bar */}
+      {/* 2. Streamlined Main Header Bar */}
       <div style={{
-        padding: '14px 28px',
+        padding: '12px 32px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 16
       }}>
-        {/* Left: Emblem + Name */}
+        {/* Left: Emblem + Sovereign Identity */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
-            width: 46,
-            height: 46,
+            width: 44,
+            height: 44,
             borderRadius: 'var(--radius-sm)',
             background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)',
             border: '1px solid #fde68a',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 24,
-            boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)'
+            fontSize: 22,
+            boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)',
+            flexShrink: 0
           }}>
             🏛️
           </div>
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="serif-heading" style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink-primary)' }}>
+              <span className="serif-heading" style={{ fontSize: 17, fontWeight: 700, color: 'var(--ink-primary)' }}>
                 {language === 'hi' ? 'अखिल भारतीय तकनीकी शिक्षा परिषद' : 'All India Council for Technical Education'}
               </span>
-              <span className="badge-clean badge-warning" style={{ fontSize: 10.5, fontWeight: 700 }}>
-                APH 2024-27 Table 1.4
-              </span>
-              <span className="badge-clean badge-active" style={{ fontSize: 10.5, fontWeight: 700 }}>
-                RBI Scheduled Banks
+              <span className="badge-clean badge-warning" style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 7px' }}>
+                APH 2024-27
               </span>
             </div>
             <div style={{ fontSize: 12, color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
               <span style={{ fontWeight: 600, color: 'var(--ink-secondary)' }}>
                 {language === 'hi' ? 'कोषदृष्टि (KoshDrishti) • सुरक्षा जमा एवं एफडीआर प्रबंधन पोर्टल' : 'KoshDrishti (कोषदृष्टि) • Security Deposit & FDR Management Portal'}
               </span>
-              <span>•</span>
-              <span style={{ color: 'var(--stamp-bank-color)', fontWeight: 600, background: '#eff6ff', padding: '2px 7px', borderRadius: 4, border: '1px solid #bfdbfe', fontSize: 11.5 }}>
-                Bank verification (simulated)
-              </span>
             </div>
           </div>
         </div>
 
         {/* Center: Search Field */}
-        <div style={{ flex: 1, maxWidth: 380, position: 'relative' }}>
-          <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-muted)' }} />
+        <div style={{ flex: 1, maxWidth: 320, position: 'relative' }}>
+          <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-muted)' }} />
           <input
             type="text"
             className="input-paper"
             placeholder={language === 'hi' ? 'संस्थान, एफडीआर संख्या या बैंक खोजें...' : 'Search FDR #, Institute, Bank, or State...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ paddingLeft: 34, height: 38, fontSize: 13.5 }}
+            style={{ paddingLeft: 34, height: 36, fontSize: 12.5 }}
           />
         </div>
 
-        {/* Right: Role Switcher & Simplified User Menu */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {/* Role selector dropdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-            <span style={{ color: 'var(--ink-muted)' }}>Role:</span>
-            <select
-              className="input-paper"
-              value={currentRole}
-              onChange={(e) => setCurrentRole(e.target.value)}
-              style={{ width: 170, height: 34, fontSize: 12, padding: '4px 26px 4px 8px' }}
-            >
-              {roles.map(r => (
-                <option key={r.id} value={r.id}>
-                  {language === 'hi' ? r.labelHi : r.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Real Alerts Notification Bell (Item 5) */}
+        {/* Right: Unified Action Controls (Uniform 36px height) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Real Alerts Notification Bell */}
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setAlertsOpen(!alertsOpen)}
               className="btn btn-paper btn-sm"
-              style={{ height: 34, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 6 }}
+              style={{ height: 36, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 6 }}
               title="Statutory alerts and expiry notices from DB"
             >
               <Bell size={14} color={alerts.length > 0 ? '#b91c1c' : 'var(--ink-secondary)'} />
@@ -263,7 +240,7 @@ export default function HeaderGIGW({
               <div style={{
                 position: 'absolute',
                 right: 0,
-                top: 40,
+                top: 42,
                 width: 320,
                 background: '#ffffff',
                 border: '1px solid var(--border-medium)',
@@ -296,16 +273,38 @@ export default function HeaderGIGW({
             )}
           </div>
 
-          {/* PyJWT Demo Login Dropdown (Item 6) */}
+          {/* Audit log button */}
+          <button
+            onClick={onOpenAuditLog}
+            className="btn btn-paper btn-sm"
+            style={{ height: 36, display: 'flex', alignItems: 'center', gap: 6 }}
+            title="Open cryptographically hash-chained regulatory audit ledger"
+          >
+            <Shield size={13} color="var(--ink-secondary)" />
+            <span className="mono" style={{ fontSize: 11, fontWeight: 600 }}>Audit log #1408</span>
+          </button>
+
+          {/* Interactive Demo Scripts Button */}
+          <button
+            onClick={onOpenDemoTours}
+            className="btn btn-paper btn-sm"
+            style={{ height: 36, display: 'flex', alignItems: 'center', gap: 6, color: '#d97706', borderColor: '#fde68a', background: '#fffbeb' }}
+            title="Launch interactive evaluation scripts (3 flows)"
+          >
+            <Award size={13} color="#d97706" />
+            <span style={{ fontWeight: 600 }}>Demo Scripts</span>
+          </button>
+
+          {/* PyJWT Demo Login Dropdown */}
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setLoginMenuOpen(!loginMenuOpen)}
               className="btn btn-paper btn-sm"
-              style={{ height: 34, border: '1px solid #10b981', color: '#047857', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}
+              style={{ height: 36, border: '1px solid #10b981', color: '#047857', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, background: '#f0fdf4' }}
               title="Log in with real PyJWT token as any of the 4 roles"
             >
               <KeyRound size={13} />
-              <span>Demo Login</span>
+              <span>Login</span>
               <ChevronDown size={11} />
             </button>
 
@@ -313,7 +312,7 @@ export default function HeaderGIGW({
               <div style={{
                 position: 'absolute',
                 right: 0,
-                top: 40,
+                top: 42,
                 width: 260,
                 background: '#ffffff',
                 border: '1px solid var(--border-medium)',
@@ -358,25 +357,15 @@ export default function HeaderGIGW({
             )}
           </div>
 
-          {/* Audit log #1408 button (Renamed from Block #1408) */}
-          <button
-            onClick={onOpenAuditLog}
-            className="btn btn-paper btn-sm"
-            style={{ height: 34 }}
-            title="Open cryptographically hash-chained regulatory audit ledger"
-          >
-            <span className="mono" style={{ fontSize: 11, fontWeight: 600 }}>Audit log #1408</span>
-          </button>
-
           {/* User Menu Dropdown */}
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="btn btn-ink-primary btn-sm"
-              style={{ height: 34, display: 'flex', alignItems: 'center', gap: 6 }}
+              style={{ height: 36, display: 'flex', alignItems: 'center', gap: 6 }}
             >
               <User size={13} />
-              <span>{currentUser.name.split(' ')[0]} ({currentUser.role === 'director' ? 'Director' : currentUser.role === 'institution' ? 'College' : currentUser.role === 'bank_validator' ? 'Bank' : 'Officer'})</span>
+              <span>{currentUser.name.split(' ')[0]}</span>
               <ChevronDown size={11} />
             </button>
 
@@ -385,7 +374,7 @@ export default function HeaderGIGW({
                 style={{
                   position: 'absolute',
                   right: 0,
-                  top: 40,
+                  top: 42,
                   width: 220,
                   background: '#ffffff',
                   border: '1px solid var(--border-medium)',
@@ -396,8 +385,11 @@ export default function HeaderGIGW({
                 }}
               >
                 <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border-subtle)', fontSize: 11 }}>
-                  <div style={{ fontWeight: 700, color: 'var(--ink-primary)' }}>Regulation Bureau</div>
-                  <div style={{ color: 'var(--ink-muted)' }}>Officer ID: AICTE-REG-042</div>
+                  <div style={{ fontWeight: 700, color: 'var(--ink-primary)' }}>{currentUser.name}</div>
+                  <div style={{ color: 'var(--ink-muted)' }}>{currentUser.email}</div>
+                  <div style={{ color: 'var(--color-amber-600)', fontWeight: 600, marginTop: 2 }}>
+                    {currentUser.role === 'director' ? 'Director / Sanctions Authority' : currentUser.role === 'institution' ? 'College Nodal Desk' : currentUser.role === 'bank_validator' ? 'Bank Branch Validator' : 'Regulation Scrutiny Officer'}
+                  </div>
                 </div>
 
                 <button
@@ -455,27 +447,28 @@ export default function HeaderGIGW({
         </div>
       </div>
 
-      {/* 3. Role Switcher Tabs Bar (Instant, One-Click Multi-Desk Navigation) */}
+      {/* 3. Segmented Active Desk Navigation Bar */}
       <div style={{
         background: 'linear-gradient(90deg, #f8f6f0 0%, #f1ece1 100%)',
         borderTop: '1px solid var(--border-subtle)',
-        padding: '8px 28px',
+        padding: '6px 32px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: 14,
+        gap: 16,
         overflowX: 'auto'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: 6 }}>
-            Active Desk:
+        {/* Segmented Desk Selector */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255, 255, 255, 0.7)', padding: '3px 4px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '0 8px' }}>
+            Desk:
           </span>
 
           {[
-            { id: 'bureau_officer', icon: '🏛️', name: 'Scrutiny Officer Desk', badge: 'Bureau Triage' },
-            { id: 'director', icon: '⚖️', name: 'Approving Authority (Director)', badge: 'Sanctions Queue' },
-            { id: 'institution', icon: '🎓', name: 'Technical Institution Desk', badge: 'College Portal' },
-            { id: 'bank_validator', icon: '🏦', name: 'Bank Branch Desk', badge: 'CBS Gateway' }
+            { id: 'bureau_officer', icon: '🏛️', name: 'Scrutiny Officer Desk' },
+            { id: 'director', icon: '⚖️', name: 'Approving Authority (Director)' },
+            { id: 'institution', icon: '🎓', name: 'College Nodal Desk' },
+            { id: 'bank_validator', icon: '🏦', name: 'Bank Branch Desk' }
           ].map(role => {
             const isActive = currentRole === role.id;
             return (
@@ -486,39 +479,36 @@ export default function HeaderGIGW({
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '7px 15px',
-                  borderRadius: 'var(--radius-xs)',
-                  background: isActive ? 'var(--ink-primary)' : '#ffffff',
+                  gap: 6,
+                  padding: '5px 12px',
+                  borderRadius: 4,
+                  background: isActive ? 'var(--ink-primary)' : 'transparent',
                   color: isActive ? '#ffffff' : 'var(--ink-secondary)',
-                  border: isActive ? '1px solid var(--ink-primary)' : '1px solid var(--border-medium)',
+                  border: 'none',
                   cursor: 'pointer',
-                  fontSize: 12.5,
+                  fontSize: 12,
                   fontWeight: isActive ? 700 : 500,
-                  boxShadow: isActive ? '0 2px 6px rgba(15, 23, 42, 0.2)' : 'none',
+                  boxShadow: isActive ? '0 1px 4px rgba(15, 23, 42, 0.2)' : 'none',
                   transition: 'all 0.15s ease'
                 }}
               >
                 <span>{role.icon}</span>
                 <span>{role.name}</span>
-                <span style={{
-                  fontSize: 10,
-                  padding: '2px 6px',
-                  borderRadius: 3,
-                  background: isActive ? 'rgba(255, 255, 255, 0.2)' : 'var(--bg-muted)',
-                  color: isActive ? '#ffffff' : 'var(--ink-muted)',
-                  fontWeight: 600
-                }}>
-                  {role.badge}
-                </span>
               </button>
             );
           })}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--ink-secondary)' }}>
-          <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#10b981' }} />
-          <span>Role-Based Access Control (RBAC): <strong>Active</strong></span>
+        {/* Right Status Pill */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 11.5, color: 'var(--ink-secondary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#10b981' }} />
+            <span>Role-Based Access Control: <strong>Active</strong></span>
+          </div>
+          <span>•</span>
+          <span style={{ color: 'var(--stamp-bank-color)', fontWeight: 600 }}>
+            Bank verification (simulated)
+          </span>
         </div>
       </div>
     </header>
