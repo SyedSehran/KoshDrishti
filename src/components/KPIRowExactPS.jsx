@@ -164,11 +164,12 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
         </div>
       </div>
 
-      {/* Colorful 7 KPI Tiles */}
+      {/* Colorful 7 KPI Tiles - Fixed Single Row */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))',
-        gap: 16
+        gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+        gap: 12,
+        width: '100%'
       }}>
         {kpis.map(tile => {
           const isSelected = activeStatusFilter === tile.id;
@@ -182,14 +183,14 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
                 background: isSelected ? 'var(--bg-muted)' : tile.cardBg,
                 border: isSelected ? '2px solid var(--ink-primary)' : `1px solid ${tile.borderColor}`,
                 borderRadius: 'var(--radius-md)',
-                padding: '16px 18px',
+                padding: '14px 14px',
                 textAlign: 'left',
                 cursor: 'pointer',
                 transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 10,
-                minHeight: 116,
+                gap: 8,
+                minHeight: 110,
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: isSelected ? '0 4px 14px rgba(0,0,0,0.1)' : 'var(--shadow-sm)'
@@ -218,32 +219,49 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
               }} />
 
               {/* Title & Icon */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: tile.iconColor, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 4 }}>
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: tile.iconColor,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }} title={tile.label}>
                   {tile.label}
                 </span>
 
                 <div style={{
-                  width: 30,
-                  height: 30,
+                  width: 26,
+                  height: 26,
                   borderRadius: '50%',
                   background: tile.iconBg,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: tile.iconColor
+                  color: tile.iconColor,
+                  flexShrink: 0
                 }}>
-                  <Icon size={16} />
+                  <Icon size={14} />
                 </div>
               </div>
 
               {/* Number Count */}
-              <div className="mono" style={{ fontSize: 28, fontWeight: 800, color: 'var(--ink-primary)', lineHeight: 1 }}>
+              <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: 'var(--ink-primary)', lineHeight: 1 }}>
                 {tile.count}
               </div>
 
               {/* Description */}
-              <div style={{ fontSize: 11.5, color: 'var(--ink-secondary)', lineHeight: 1.3 }}>
+              <div style={{
+                fontSize: 11,
+                color: 'var(--ink-secondary)',
+                lineHeight: 1.25,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }} title={tile.desc}>
                 {tile.desc}
               </div>
             </button>
