@@ -1,4 +1,4 @@
-# KoshDrishti (कोषदृष्टि) • AICTE VISHWAS-FDR
+# KoshDrishti • AICTE VISHWAS-FDR
 ### Centralized Security Deposit & Fixed Deposit Receipt (FDR) Management Portal
 **Problem Statement ID:** 26265  
 **Department:** Regulation Bureau, All India Council for Technical Education (AICTE), Ministry of Education, Govt. of India  
@@ -8,7 +8,7 @@
 
 ---
 
-## 🏛️ About KoshDrishti (कोषदृष्टि)
+## 🏛️ About KoshDrishti
 
 **KoshDrishti** (from Sanskrit *कोष* = Treasury / Escrow / Security Deposit, and *दृष्टि* = Vision / Oversight / Transparency) is a centralized, digital regulatory governance platform built for the **AICTE Regulation Bureau**. 
 
