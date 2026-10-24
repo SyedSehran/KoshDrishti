@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Building2, Landmark, ArrowRightLeft, AlertTriangle, CheckCircle, Send, RefreshCw } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle, Send, RefreshCw } from 'lucide-react';
 import { TrustStamp } from './SignatureVisuals';
 
 export default function DiscrepancyInspectorModal({ 

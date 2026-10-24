@@ -2,113 +2,230 @@
  * AICTE Approval Process Handbook (APH 2024-27)
  * Chapter I, Table 1.4: Security Deposit Requirements for Technical Institutions
  * 
- * This is the SINGLE SOURCE OF TRUTH for all screens, calculations,
- * validation rules, and release logic across the portal.
+ * Verified statutory source of truth for:
+ * - Minimum deposit calculations by Program × Level (Diploma / UG / PG)
+ * - Single mandatory 10-year lock-in tenor
+ * - Leased building 2x multiplier
+ * - Chapter XI, Clause 11.8 discrepancy & penalty rules
  */
 
 export const APH_CONFIG = {
   handbookEdition: "APH 2024-25 to 2026-27",
   regulatoryClause: "Chapter I, Clause 1.4 & Table 1.4",
-  lockInRules: {
-    newInstitutionMaxYears: 10,
-    programExpansionYears: 8,
-    polytechnicYears: 8,
-    nocMandatoryForRelease: true,
-    jointLienClauseRequired: "Member Secretary, AICTE and Chairman/Secretary of the Trust/Society"
-  },
+  discrepancyClause: "Chapter XI, Clause 11.8",
+  mandatoryTenorYears: 10,
+  leasedBuildingMultiplier: 2,
+
+  // Table 1.4 Matrix: Program × Level (Amounts in ₹ Lakhs)
+  // All programs have a single mandatory 10-year tenor
+  table1_4_matrix: [
+    {
+      program: "Engineering & Technology",
+      diplomaLakhs: 15,
+      ugLakhs: 35,
+      pgLakhs: 15,
+      notes: "Establishment of Technical Institution (Engineering)"
+    },
+    {
+      program: "Planning",
+      diplomaLakhs: 15,
+      ugLakhs: 15,
+      pgLakhs: 15,
+      notes: "Town & Country Planning programs"
+    },
+    {
+      program: "Applied Arts and Crafts",
+      diplomaLakhs: 15,
+      ugLakhs: 15,
+      pgLakhs: 15,
+      notes: "Applied Arts & Design disciplines"
+    },
+    {
+      program: "Design",
+      diplomaLakhs: 15,
+      ugLakhs: 15,
+      pgLakhs: 15,
+      notes: "Industrial, Visual, Communication & Product Design"
+    },
+    {
+      program: "Hotel Management & Catering Technology (HMCT)",
+      diplomaLakhs: 15,
+      ugLakhs: 15,
+      pgLakhs: 15,
+      notes: "Hospitality & Catering Technology"
+    },
+    {
+      program: "Computer Applications",
+      diplomaLakhs: null,
+      ugLakhs: 5,   // BCA
+      pgLakhs: 15,  // MCA
+      notes: "BCA (UG: ₹5L) / MCA (PG: ₹15L)"
+    },
+    {
+      program: "Management",
+      diplomaLakhs: null,
+      ugLakhs: 5,   // BBA
+      pgLakhs: 15,  // MBA / PGDM
+      notes: "BBA (UG: ₹5L) / MBA & PGDM (PG: ₹15L)"
+    }
+  ],
+
+  // Flattened Table 1.4 lookup for easy selection across forms, filters, and seed generators
   table1_4: [
     {
       id: "ENGG_UG",
       program: "Engineering & Technology (UG)",
-      category: "Technical",
-      minAmount: 3500000,
+      category: "Engineering",
+      level: "UG",
       minAmountLakhs: 35,
+      minAmount: 3500000,
       tenorYears: 10,
-      annualRenewalRequired: false,
-      isExempt: false,
-      description: "Mandatory 10-year joint FDR for establishment of new technical institutions."
+      description: "Mandatory 10-year deposit for Under Graduate Engineering (APH Table 1.4)"
+    },
+    {
+      id: "ENGG_DIPLOMA",
+      program: "Engineering & Technology (Diploma)",
+      category: "Engineering",
+      level: "Diploma",
+      minAmountLakhs: 15,
+      minAmount: 1500000,
+      tenorYears: 10,
+      description: "Mandatory 10-year deposit for Polytechnic Diploma Engineering (APH Table 1.4)"
+    },
+    {
+      id: "ENGG_PG",
+      program: "Engineering & Technology (PG)",
+      category: "Engineering",
+      level: "PG",
+      minAmountLakhs: 15,
+      minAmount: 1500000,
+      tenorYears: 10,
+      description: "Mandatory 10-year deposit for M.Tech / ME (APH Table 1.4)"
     },
     {
       id: "MGMT_PG",
-      program: "Management (MBA / PGDM)",
+      program: "Management (PG - MBA/PGDM)",
       category: "Management",
-      minAmount: 2500000,
-      minAmountLakhs: 25,
-      tenorYears: 8,
-      annualRenewalRequired: false,
-      isExempt: false,
-      description: "Mandatory 8-year joint FDR for standalone or integrated management programs."
-    },
-    {
-      id: "PHARM_UG",
-      program: "Pharmacy (B.Pharm / M.Pharm)",
-      category: "Pharmacy",
-      minAmount: 3000000,
-      minAmountLakhs: 30,
+      level: "PG",
+      minAmountLakhs: 15,
+      minAmount: 1500000,
       tenorYears: 10,
-      annualRenewalRequired: false,
-      isExempt: false,
-      description: "Mandatory 10-year joint FDR pledged with Member Secretary, AICTE."
+      description: "Mandatory 10-year deposit for MBA / PGDM (APH Table 1.4)"
     },
     {
-      id: "ARCH_UG",
-      program: "Architecture & Town Planning",
-      category: "Architecture",
-      minAmount: 3500000,
-      minAmountLakhs: 35,
+      id: "MGMT_UG",
+      program: "Management (UG - BBA)",
+      category: "Management",
+      level: "UG",
+      minAmountLakhs: 5,
+      minAmount: 500000,
       tenorYears: 10,
-      annualRenewalRequired: false,
-      isExempt: false,
-      description: "Mandatory 10-year security deposit for Council of Architecture alignment."
+      description: "Mandatory 10-year deposit for Under Graduate Management (BBA) (APH Table 1.4)"
     },
     {
-      id: "HOTEL_HMCT",
+      id: "COMP_PG",
+      program: "Computer Applications (PG - MCA)",
+      category: "Computer Applications",
+      level: "PG",
+      minAmountLakhs: 15,
+      minAmount: 1500000,
+      tenorYears: 10,
+      description: "Mandatory 10-year deposit for MCA (APH Table 1.4)"
+    },
+    {
+      id: "COMP_UG",
+      program: "Computer Applications (UG - BCA)",
+      category: "Computer Applications",
+      level: "UG",
+      minAmountLakhs: 5,
+      minAmount: 500000,
+      tenorYears: 10,
+      description: "Mandatory 10-year deposit for BCA (APH Table 1.4)"
+    },
+    {
+      id: "PLANNING_ALL",
+      program: "Planning (Diploma / UG / PG)",
+      category: "Planning",
+      level: "All",
+      minAmountLakhs: 15,
+      minAmount: 1500000,
+      tenorYears: 10,
+      description: "Mandatory 10-year deposit for Town & Country Planning (APH Table 1.4)"
+    },
+    {
+      id: "APPLIED_ARTS_ALL",
+      program: "Applied Arts & Crafts (All Levels)",
+      category: "Applied Arts",
+      level: "All",
+      minAmountLakhs: 15,
+      minAmount: 1500000,
+      tenorYears: 10,
+      description: "Mandatory 10-year deposit for Applied Arts & Crafts (APH Table 1.4)"
+    },
+    {
+      id: "DESIGN_ALL",
+      program: "Design (All Levels)",
+      category: "Design",
+      level: "All",
+      minAmountLakhs: 15,
+      minAmount: 1500000,
+      tenorYears: 10,
+      description: "Mandatory 10-year deposit for Design programs (APH Table 1.4)"
+    },
+    {
+      id: "HMCT_ALL",
       program: "Hotel Management & Catering (HMCT)",
       category: "Hotel Management",
-      minAmount: 2000000,
-      minAmountLakhs: 20,
-      tenorYears: 8,
-      annualRenewalRequired: false,
-      isExempt: false,
-      description: "Mandatory 8-year lock-in for diploma and degree hospitality courses."
-    },
-    {
-      id: "POLY_DIPLOMA",
-      program: "Polytechnic (Diploma Engineering)",
-      category: "Polytechnic",
-      minAmount: 2000000,
-      minAmountLakhs: 20,
-      tenorYears: 8,
-      annualRenewalRequired: false,
-      isExempt: false,
-      description: "Mandatory 8-year security deposit for state board polytechnic diploma."
-    },
-    {
-      id: "APPLIED_ARTS",
-      program: "Applied Arts & Crafts",
-      category: "Applied Arts",
-      minAmount: 1500000,
+      level: "All",
       minAmountLakhs: 15,
-      tenorYears: 8,
-      annualRenewalRequired: false,
-      isExempt: false,
-      description: "Mandatory 8-year deposit for visual arts and applied design."
+      minAmount: 1500000,
+      tenorYears: 10,
+      description: "Mandatory 10-year deposit for Hotel Management & Catering (APH Table 1.4)"
     },
     {
       id: "GOVT_EXEMPT",
       program: "Government / University Constituent (All)",
       category: "Government",
-      minAmount: 0,
+      level: "All",
       minAmountLakhs: 0,
+      minAmount: 0,
       tenorYears: 0,
-      annualRenewalRequired: false,
       isExempt: true,
-      exemptionClause: "Table 1.4 Clause (c): 100% Central/State Govt funded institutions exempt with verified affidavit.",
-      description: "Exempt from financial collateral upon submission of State Secretary affidavit."
+      description: "100% Central/State Govt funded institutions exempt with verified affidavit (Table 1.4 Clause c)"
     }
   ],
 
-  // RBI Scheduled Banks classification
+  // Excluded Programs per statutory jurisdiction
+  excludedPrograms: [
+    {
+      name: "Pharmacy (B.Pharm / M.Pharm)",
+      regulator: "Pharmacy Council of India (PCI)",
+      note: "Not in AICTE Table 1.4 (Governed under Pharmacy Act 1948 / PCI regulations)."
+    },
+    {
+      name: "Architecture (B.Arch / M.Arch)",
+      regulator: "Council of Architecture (CoA)",
+      note: "Not in AICTE Table 1.4 (Governed under Architects Act 1972 / CoA regulations)."
+    }
+  ],
+
+  // Chapter XI, Clause 11.8 Discrepancy & Penalty Rules
+  clause11_8_rules: {
+    tenorShortfallPenaltyPct: 10, // 10% penalty flag on premature encashment or shortfall
+    affidavitProofDeadlineDays: 15, // 15-day proof & affidavit submission deadline
+    latePenaltyStages: [
+      { daysLate: 15, penaltyPct: 10, label: "Stage 1: 10% statutory surcharge for 15-day delay" },
+      { daysLate: 30, penaltyPct: 50, label: "Stage 2: 50% severe surcharge for 30+ day delay" }
+    ],
+    releasePrerequisites: [
+      "10-year lock-in term complete (days_remaining <= 0)",
+      "Zero open complaints or pending inquiry",
+      "Two-officer biometric approval (Scrutiny Officer + Approving Authority / Director)",
+      "Formal NOC issued to Bank CBS"
+    ]
+  },
+
+  // RBI Scheduled Commercial Banks Registry
   rbiScheduledBanks: [
     { name: "State Bank of India", code: "SBI", ifscPrefix: "SBIN", type: "Public Sector Scheduled Bank" },
     { name: "Punjab National Bank", code: "PNB", ifscPrefix: "PUNB", type: "Public Sector Scheduled Bank" },
@@ -119,20 +236,33 @@ export const APH_CONFIG = {
     { name: "Indian Bank", code: "INDIAN", ifscPrefix: "IDIB", type: "Public Sector Scheduled Bank" },
     { name: "HDFC Bank", code: "HDFC", ifscPrefix: "HDFC", type: "Private Scheduled Commercial Bank" },
     { name: "ICICI Bank", code: "ICICI", ifscPrefix: "ICIC", type: "Private Scheduled Commercial Bank" },
-    { name: "Axis Bank", code: "AXIS", ifscPrefix: "UTIB", type: "Private Scheduled Commercial Bank" },
-    { name: "Baroda UP Bank", code: "BUPB", ifscPrefix: "BARB0BUPGB", type: "RBI Scheduled Regional Rural Bank" },
-    { name: "Kerala Gramin Bank", code: "KGB", ifscPrefix: "KLGB0040101", type: "RBI Scheduled Regional Rural Bank" }
+    { name: "Axis Bank", code: "AXIS", ifscPrefix: "UTIB", type: "Private Scheduled Commercial Bank" }
   ],
 
-  // Legacy sub-statuses matching AICTE Security Deposit Guide
-  statusMapping: {
-    DEPOSIT_REQUESTED: { label: "Deposit requested", stage: "Pending", gigwClass: "pending" },
-    UNDER_SCRUTINY: { label: "Deposit received (under review)", stage: "Pending", gigwClass: "pending" },
-    ACTIVE_VERIFIED: { label: "Active (lien confirmed)", stage: "Active", gigwClass: "verified" },
-    DISCREPANCY_FLAGGED: { label: "Discrepancy flagged", stage: "Discrepancy", gigwClass: "flagged" },
-    EXPIRING_SOON: { label: "Expiring (<60 days)", stage: "Expiring", gigwClass: "warning" },
-    RELEASE_REQUESTED: { label: "Release requested (NOC review)", stage: "Release", gigwClass: "release" },
-    RELEASED_DISCHARGED: { label: "Discharged (NOC issued)", stage: "Released", gigwClass: "released" },
-    GOVT_EXEMPT: { label: "Govt exempt (affidavit verified)", stage: "Active", gigwClass: "exempt" }
+  /**
+   * Calculates the exact statutory deposit requirement
+   * @param {string} program - Program name
+   * @param {boolean} isLeasedBuilding - True if operating on leased premises (2x multiplier)
+   * @param {boolean} isGovtExempt - True if 100% government funded
+   */
+  calculateRequirement(program, isLeasedBuilding = false, isGovtExempt = false) {
+    if (isGovtExempt || program.includes("Government")) {
+      return { minAmount: 0, minAmountLakhs: 0, tenorYears: 0, isExempt: true, multiplier: 1 };
+    }
+
+    const norm = this.table1_4.find(n => n.program === program || program.includes(n.category)) || this.table1_4[0];
+    const multiplier = isLeasedBuilding ? this.leasedBuildingMultiplier : 1;
+    const baseLakhs = norm.minAmountLakhs;
+    const finalLakhs = baseLakhs * multiplier;
+
+    return {
+      minAmount: finalLakhs * 100000,
+      minAmountLakhs: finalLakhs,
+      tenorYears: this.mandatoryTenorYears,
+      isExempt: false,
+      multiplier,
+      baseLakhs,
+      isLeasedApplied: isLeasedBuilding
+    };
   }
 };

@@ -4,12 +4,17 @@
 
 export const APH_NORMS_CATALOG = [
   { program: "Engineering & Technology (UG)", minAmountLakhs: 35, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
-  { program: "Management (MBA/PGDM)", minAmountLakhs: 25, lockInYears: 8, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
-  { program: "Pharmacy (B.Pharm/M.Pharm)", minAmountLakhs: 30, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
-  { program: "Architecture & Town Planning", minAmountLakhs: 35, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
-  { program: "Hotel Management & Catering (HMCT)", minAmountLakhs: 20, lockInYears: 8, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
-  { program: "Applied Arts & Crafts", minAmountLakhs: 15, lockInYears: 8, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
-  { program: "Polytechnic (Diploma Engineering)", minAmountLakhs: 20, lockInYears: 8, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Engineering & Technology (Diploma)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Engineering & Technology (PG)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Management (PG - MBA/PGDM)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Management (UG - BBA)", minAmountLakhs: 5, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Computer Applications (PG - MCA)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Computer Applications (UG - BCA)", minAmountLakhs: 5, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Planning (Diploma / UG / PG)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Applied Arts & Crafts", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Design (All Levels)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Hotel Management & Catering (HMCT)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Pharmacy & Architecture (Not in Table 1.4)", minAmountLakhs: 0, lockInYears: 0, jointLienMandatory: false, category: "PCI / CoA Statutory Regulators", exemptionAllowed: true, exemptionClause: "Governed by PCI / CoA Acts, not in AICTE Table 1.4" },
   { program: "Government / University Dept (All)", minAmountLakhs: 0, lockInYears: 0, jointLienMandatory: false, category: "Government / Constituent", exemptionAllowed: true, exemptionClause: "APH 2024-27 Table 1.4 Clause (c) - Exempt with Mandated Govt Affidavit" }
 ];
 

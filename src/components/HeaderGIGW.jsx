@@ -24,13 +24,12 @@ export default function HeaderGIGW({
     department: "Regulation Bureau"
   });
 
-  // Fetch real alerts from SQLite DB
-  useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/v1/alerts')
-      .then(r => r.json())
-      .then(d => setAlerts(d.alerts || []))
-      .catch(() => {});
-  }, []);
+  const ROLE_ACCOUNTS = {
+    bureau_officer: { email: 'officer@aicte.gov.in', pw: 'Officer@123', name: 'Rajesh Sharma', role: 'bureau_officer' },
+    director: { email: 'director@aicte.gov.in', pw: 'Director@123', name: 'Prof. Rajive Kumar', role: 'director' },
+    institution: { email: 'college@kalinga.edu.in', pw: 'College@123', name: 'Dr. S. Mohanty', role: 'institution' },
+    bank_validator: { email: 'validator@sbi.co.in', pw: 'Bank@123', name: 'A. K. Verma', role: 'bank_validator' }
+  };
 
   // Login handler using backend PyJWT auth endpoint
   const handleDemoLogin = async (email, password) => {
@@ -51,6 +50,17 @@ export default function HeaderGIGW({
       console.error("Login failed:", err);
     }
   };
+
+  // Fetch real alerts and ensure initial PyJWT token is active
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/v1/alerts')
+      .then(r => r.json())
+      .then(d => setAlerts(d.alerts || []))
+      .catch(() => {});
+
+    const acc = ROLE_ACCOUNTS[currentRole] || ROLE_ACCOUNTS.bureau_officer;
+    handleDemoLogin(acc.email, acc.pw);
+  }, []);
 
   const roles = [
     { id: 'bureau_officer', name: 'Scrutiny Officer', labelHi: 'जांच अधिकारी' },
@@ -475,7 +485,11 @@ export default function HeaderGIGW({
               <button
                 key={role.id}
                 type="button"
-                onClick={() => setCurrentRole(role.id)}
+                onClick={() => {
+                  setCurrentRole(role.id);
+                  const acc = ROLE_ACCOUNTS[role.id];
+                  if (acc) handleDemoLogin(acc.email, acc.pw);
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

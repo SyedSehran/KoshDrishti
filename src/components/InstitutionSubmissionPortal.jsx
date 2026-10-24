@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
 import { 
-  Building2, 
   Upload, 
   Scan, 
   CheckCircle2, 
   AlertTriangle, 
-  FileText, 
-  Sparkles, 
-  ShieldCheck, 
-  Landmark, 
-  Calendar, 
-  IndianRupee,
-  HelpCircle,
-  Layers
+  ShieldCheck 
 } from 'lucide-react';
-import { APH_NORMS_CATALOG, MOCK_BANK_CATALOG } from '../data/mockData';
+import { APH_NORMS_CATALOG } from '../data/mockData';
 
 export default function InstitutionSubmissionPortal({ onAddNewFDR }) {
   const [selectedProgram, setSelectedProgram] = useState(APH_NORMS_CATALOG[0].program);
@@ -31,6 +23,7 @@ export default function InstitutionSubmissionPortal({ onAddNewFDR }) {
   const [lienConfirmed, setLienConfirmed] = useState(true);
   const [isOCRProcessing, setIsOCRProcessing] = useState(false);
   const [ocrSuccess, setOcrSuccess] = useState(false);
+  const [ocrError, setOcrError] = useState(null);
   const [submissionComplete, setSubmissionComplete] = useState(false);
 
   // Find norm for selected program
@@ -47,6 +40,9 @@ export default function InstitutionSubmissionPortal({ onAddNewFDR }) {
 
   const handleSimulateOCR = async () => {
     setIsOCRProcessing(true);
+    setOcrError(null);
+    setOcrSuccess(false);
+
     try {
       const sampleSlipText = `STATE BANK OF INDIA - PARLIAMENT STREET NEW DELHI
 FIXED DEPOSIT RECEIPT NO: FDR/SBI/991048221
@@ -60,24 +56,30 @@ MANDATORY LIEN MARKED IN FAVOUR OF AICTE REGULATION BUREAU`;
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: sampleSlipText })
       });
-      const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
       setIsOCRProcessing(false);
+
+      if (data.status === 'UNREADABLE' || (!data.extracted_fdr_number && !data.extracted_amount)) {
+        setOcrError("OCR extraction incomplete: Fields could not be confidently identified. Please enter manually.");
+        return;
+      }
+
       setOcrSuccess(true);
       if (data.extracted_fdr_number) setFdrNumber(data.extracted_fdr_number);
       if (data.extracted_amount) setDepositAmount(data.extracted_amount);
-      setJointHolderName('Member Secretary, AICTE & Chairman, Shri Dharmendra Trust');
-      setLienConfirmed(true);
-    } catch (err) {
-      // Fallback
-      setTimeout(() => {
-        setIsOCRProcessing(false);
-        setOcrSuccess(true);
-        setFdrNumber('FDR/SBI/991048221');
-        setDepositAmount(3500000);
+      if (data.extracted_bank) setIssuingBank(data.extracted_bank);
+      if (data.has_aicte_title) {
         setJointHolderName('Member Secretary, AICTE & Chairman, Shri Dharmendra Trust');
         setLienConfirmed(true);
-      }, 800);
+      }
+    } catch (err) {
+      setIsOCRProcessing(false);
+      setOcrError("OCR service unavailable (API offline). Please enter details manually.");
     }
   };
 
@@ -309,6 +311,23 @@ MANDATORY LIEN MARKED IN FAVOUR OF AICTE REGULATION BUREAU`;
                 }}>
                   <CheckCircle2 size={13} />
                   <span>OCR extracted successfully: 100% confidence match. Form auto-populated below.</span>
+                </div>
+              )}
+
+              {ocrError && (
+                <div style={{
+                  padding: '8px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  color: '#f87171',
+                  fontSize: 11,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}>
+                  <AlertTriangle size={13} />
+                  <span>{ocrError}</span>
                 </div>
               )}
             </div>

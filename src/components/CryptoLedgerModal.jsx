@@ -49,7 +49,11 @@ export default function CryptoLedgerModal({ onClose }) {
 
   const handleTamperDemo = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/ledger/tamper', { method: 'POST' });
+      const token = localStorage.getItem('kosh_jwt_token') || '';
+      const res = await fetch('http://127.0.0.1:8000/api/v1/ledger/tamper', { 
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       setActionNotice(data.message);
       await fetchLedger();
@@ -64,7 +68,11 @@ export default function CryptoLedgerModal({ onClose }) {
 
   const handleRepairDemo = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/ledger/repair', { method: 'POST' });
+      const token = localStorage.getItem('kosh_jwt_token') || '';
+      const res = await fetch('http://127.0.0.1:8000/api/v1/ledger/repair', { 
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       setActionNotice(data.message);
       await fetchLedger();

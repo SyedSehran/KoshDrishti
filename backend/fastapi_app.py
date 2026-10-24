@@ -1,7 +1,14 @@
 """
-AICTE VISHWAS-FDR • Enterprise FastAPI Production Microservice
-Implements JWT Auth + RBAC, Celery Task Triggers, MinIO S3 Storage,
-PostgreSQL Relational Mapping, PaddleOCR/Tesseract Pipeline, and XGBoost Risk Scorer.
+[DEPRECATED / PROTOTYPE MOCK FILE - NOT USED IN PRODUCTION]
+===========================================================
+WARNING: This file is a legacy prototype stub and is NOT used by the running application.
+- Production backend runs exclusively via `backend/server.py` (which implements genuine
+  SQLite persistence, genuine SHA-256 hash chaining, dynamic regex OCR extraction,
+  real-time background alert scanner, and PyJWT role-based access control).
+- Do NOT use this file for live demos or statutory evaluations.
+- The OCR endpoint here returns fixed mock responses, and the risk scoring is a rule-based
+  heuristic rather than a trained XGBoost model.
+===========================================================
 """
 
 from typing import List, Optional

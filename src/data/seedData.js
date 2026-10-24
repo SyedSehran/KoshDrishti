@@ -23,21 +23,21 @@ const REAL_INSTITUTIONS_BASE = [
   { name: "Birla Institute of Applied Management", trust: "Birla Academy of Art and Culture", city: "Kolkata", state: "West Bengal", region: "Eastern", program: "Management (MBA / PGDM)" },
   { name: "Government College of Engineering, Pune", trust: "State Govt of Maharashtra", city: "Pune", state: "Maharashtra", region: "Western", program: "Government / University Constituent (All)", isGovt: true },
   { name: "Delhi Technological University Campus", trust: "Govt of NCT of Delhi", city: "New Delhi", state: "Delhi", region: "Northern", program: "Government / University Constituent (All)", isGovt: true },
-  { name: "Manipal Institute of Pharmaceutical Sciences", trust: "Academy of General Education", city: "Manipal", state: "Karnataka", region: "South-Western", program: "Pharmacy (B.Pharm / M.Pharm)" },
+  { name: "Manipal Institute of Design & Media", trust: "Academy of General Education", city: "Manipal", state: "Karnataka", region: "South-Western", program: "Design (All Levels)" },
   { name: "Jadavpur University Faculty of Engineering", trust: "State Govt of West Bengal", city: "Kolkata", state: "West Bengal", region: "Eastern", program: "Government / University Constituent (All)", isGovt: true },
   { name: "Sardar Vallabhbhai Patel Institute of Tech", trust: "Vasavada Education Trust", city: "Vasad", state: "Gujarat", region: "Central", program: "Engineering & Technology (UG)" },
   { name: "Institute of Chemical Technology", trust: "Govt of Maharashtra / Deemed", city: "Mumbai", state: "Maharashtra", region: "Western", program: "Government / University Constituent (All)", isGovt: true },
-  { name: "Chitkara Institute of Architecture & Planning", trust: "Chitkara Educational Trust", city: "Rajpura", state: "Punjab", region: "North-West", program: "Architecture & Town Planning" },
+  { name: "Chitkara School of Planning & Infrastructure", trust: "Chitkara Educational Trust", city: "Rajpura", state: "Punjab", region: "North-West", program: "Planning (Diploma / UG / PG)" },
   { name: "Walchand College of Engineering", trust: "Administrative Council of Walchand", city: "Sangli", state: "Maharashtra", region: "Western", program: "Engineering & Technology (UG)" },
-  { name: "National Institute of Applied Management", trust: "Jaipur Educational Foundation", city: "Jaipur", state: "Rajasthan", region: "North-West", program: "Management (MBA / PGDM)" },
+  { name: "National Institute of Applied Management", trust: "Jaipur Educational Foundation", city: "Jaipur", state: "Rajasthan", region: "North-West", program: "Management (PG - MBA/PGDM)" },
   { name: "Madhav Institute of Technology & Science", trust: "Scindia Engineering College Society", city: "Gwalior", state: "Madhya Pradesh", region: "Central", program: "Engineering & Technology (UG)" }
 ];
 
 // Fictional Simulated Institutions for Discrepancy Scenarios
 const FICTIONAL_DISCREPANCY_INSTITUTIONS = [
   { name: "[Simulated] Apex Institute of Applied Computing", trust: "Simulated Technical Education Trust", city: "Lucknow", state: "Uttar Pradesh", region: "Northern", program: "Engineering & Technology (UG)" },
-  { name: "[Simulated] Devgiri Polytechnic Academy", trust: "Devgiri Vidya Vikas Society", city: "Aurangabad", state: "Maharashtra", region: "Western", program: "Polytechnic (Diploma Engineering)" },
-  { name: "[Simulated] Vandana School of Management Studies", trust: "Vandana Charitable Foundation", city: "Kanpur", state: "Uttar Pradesh", region: "Northern", program: "Management (MBA / PGDM)" }
+  { name: "[Simulated] Devgiri Polytechnic Academy", trust: "Devgiri Vidya Vikas Society", city: "Aurangabad", state: "Maharashtra", region: "Western", program: "Engineering & Technology (Diploma)" },
+  { name: "[Simulated] Vandana School of Management Studies", trust: "Vandana Charitable Foundation", city: "Kanpur", state: "Uttar Pradesh", region: "Northern", program: "Management (PG - MBA/PGDM)" }
 ];
 
 const STATES_LIST = [

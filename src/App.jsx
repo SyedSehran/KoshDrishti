@@ -14,8 +14,6 @@ import DirectorDeskView from './components/roles/DirectorDeskView';
 import { SEED_DATASET_200 } from './data/seedData';
 import { INITIAL_LEDGER_CHAIN } from './data/mockData';
 import { generateBlockHash } from './utils/cryptoLedger';
-import { APH_CONFIG } from './config/aph';
-import { Award, Sparkles, HelpCircle, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function App() {
   const [records, setRecords] = useState(SEED_DATASET_200);
@@ -101,9 +99,13 @@ export default function App() {
 
     // 2. Persist to real backend SQLite DB & append to Merkle ledger
     try {
+      const token = localStorage.getItem('kosh_jwt_token') || '';
       await fetch(`http://127.0.0.1:8000/api/v1/instruments/${fdrId}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           status: 'Active',
           legacyStatus: 'Lien confirmed in CBS',
@@ -159,9 +161,13 @@ export default function App() {
 
     // 2. Persist to real backend SQLite DB
     try {
+      const token = localStorage.getItem('kosh_jwt_token') || '';
       await fetch(`http://127.0.0.1:8000/api/v1/instruments/${fdrId}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           status: 'Released',
           legacyStatus: 'Discharged (NOC issued post 10-Yr Lock-in)',

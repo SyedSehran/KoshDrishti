@@ -24,29 +24,33 @@ REAL_INSTITUTIONS_BASE = [
     {"name": "Birla Institute of Applied Management", "trust": "Birla Academy of Art and Culture", "city": "Kolkata", "state": "West Bengal", "region": "Eastern", "program": "Management (MBA / PGDM)"},
     {"name": "Government College of Engineering, Pune", "trust": "State Govt of Maharashtra", "city": "Pune", "state": "Maharashtra", "region": "Western", "program": "Government / University Constituent (All)", "isGovt": True},
     {"name": "Delhi Technological University Campus", "trust": "Govt of NCT of Delhi", "city": "New Delhi", "state": "Delhi", "region": "Northern", "program": "Government / University Constituent (All)", "isGovt": True},
-    {"name": "Manipal Institute of Pharmaceutical Sciences", "trust": "Academy of General Education", "city": "Manipal", "state": "Karnataka", "region": "South-Western", "program": "Pharmacy (B.Pharm / M.Pharm)"},
+    {"name": "Manipal Institute of Design & Media", "trust": "Academy of General Education", "city": "Manipal", "state": "Karnataka", "region": "South-Western", "program": "Design (All Levels)"},
     {"name": "Jadavpur University Faculty of Engineering", "trust": "State Govt of West Bengal", "city": "Kolkata", "state": "West Bengal", "region": "Eastern", "program": "Government / University Constituent (All)", "isGovt": True},
     {"name": "Sardar Vallabhbhai Patel Institute of Tech", "trust": "Vasavada Education Trust", "city": "Vasad", "state": "Gujarat", "region": "Central", "program": "Engineering & Technology (UG)"},
     {"name": "Institute of Chemical Technology", "trust": "Govt of Maharashtra / Deemed", "city": "Mumbai", "state": "Maharashtra", "region": "Western", "program": "Government / University Constituent (All)", "isGovt": True},
-    {"name": "Chitkara Institute of Architecture & Planning", "trust": "Chitkara Educational Trust", "city": "Rajpura", "state": "Punjab", "region": "North-West", "program": "Architecture & Town Planning"},
+    {"name": "Chitkara School of Planning & Infrastructure", "trust": "Chitkara Educational Trust", "city": "Rajpura", "state": "Punjab", "region": "North-West", "program": "Planning (Diploma / UG / PG)"},
     {"name": "Walchand College of Engineering", "trust": "Administrative Council of Walchand", "city": "Sangli", "state": "Maharashtra", "region": "Western", "program": "Engineering & Technology (UG)"},
-    {"name": "National Institute of Applied Management", "trust": "Jaipur Educational Foundation", "city": "Jaipur", "state": "Rajasthan", "region": "North-West", "program": "Management (MBA / PGDM)"},
+    {"name": "National Institute of Applied Management", "trust": "Jaipur Educational Foundation", "city": "Jaipur", "state": "Rajasthan", "region": "North-West", "program": "Management (PG - MBA/PGDM)"},
     {"name": "Madhav Institute of Technology & Science", "trust": "Scindia Engineering College Society", "city": "Gwalior", "state": "Madhya Pradesh", "region": "Central", "program": "Engineering & Technology (UG)"}
 ]
 
 FICTIONAL_DISCREPANCY_INSTITUTIONS = [
     {"name": "[Simulated] Apex Institute of Applied Computing", "trust": "Simulated Technical Education Trust", "city": "Lucknow", "state": "Uttar Pradesh", "region": "Northern", "program": "Engineering & Technology (UG)"},
-    {"name": "[Simulated] Devgiri Polytechnic Academy", "trust": "Devgiri Vidya Vikas Society", "city": "Aurangabad", "state": "Maharashtra", "region": "Western", "program": "Polytechnic (Diploma Engineering)"},
-    {"name": "[Simulated] Vandana School of Management Studies", "trust": "Vandana Charitable Foundation", "city": "Kanpur", "state": "Uttar Pradesh", "region": "Northern", "program": "Management (MBA / PGDM)"}
+    {"name": "[Simulated] Devgiri Polytechnic Academy", "trust": "Devgiri Vidya Vikas Society", "city": "Aurangabad", "state": "Maharashtra", "region": "Western", "program": "Engineering & Technology (Diploma)"},
+    {"name": "[Simulated] Vandana School of Management Studies", "trust": "Vandana Charitable Foundation", "city": "Kanpur", "state": "Uttar Pradesh", "region": "Northern", "program": "Management (PG - MBA/PGDM)"}
 ]
 
 PROGRAM_CONFIGS = [
     {"program": "Engineering & Technology (UG)", "minAmount": 3500000, "tenorYears": 10},
-    {"program": "Management (MBA / PGDM)", "minAmount": 2500000, "tenorYears": 8},
-    {"program": "Pharmacy (B.Pharm / M.Pharm)", "minAmount": 3000000, "tenorYears": 10},
-    {"program": "Architecture & Town Planning", "minAmount": 3500000, "tenorYears": 10},
-    {"program": "Polytechnic (Diploma Engineering)", "minAmount": 2000000, "tenorYears": 8},
-    {"program": "Hotel Management (HMCT)", "minAmount": 2000000, "tenorYears": 8},
+    {"program": "Engineering & Technology (Diploma)", "minAmount": 1500000, "tenorYears": 10},
+    {"program": "Engineering & Technology (PG)", "minAmount": 1500000, "tenorYears": 10},
+    {"program": "Management (PG - MBA/PGDM)", "minAmount": 1500000, "tenorYears": 10},
+    {"program": "Management (UG - BBA)", "minAmount": 500000, "tenorYears": 10},
+    {"program": "Computer Applications (PG - MCA)", "minAmount": 1500000, "tenorYears": 10},
+    {"program": "Computer Applications (UG - BCA)", "minAmount": 500000, "tenorYears": 10},
+    {"program": "Planning (Diploma / UG / PG)", "minAmount": 1500000, "tenorYears": 10},
+    {"program": "Applied Arts & Crafts (All Levels)", "minAmount": 1500000, "tenorYears": 10},
+    {"program": "Hotel Management & Catering (HMCT)", "minAmount": 1500000, "tenorYears": 10},
     {"program": "Government / University Constituent (All)", "minAmount": 0, "tenorYears": 0, "isGovt": True}
 ]
 
@@ -344,7 +348,7 @@ def seed_database():
     c.execute('''
         INSERT INTO alerts (fdr_id, institution_name, alert_type, days_remaining, message, status, created_at)
         VALUES 
-        ('FDR-2018-1005', 'Symbiosis Institute of Business & Digital Media', 'CRITICAL_30_DAY', 27, 'Mandatory 8-Year deposit matures in 27 days. Send replacement/renewal advisory.', 'PENDING', datetime('now')),
+        ('FDR-2018-1005', 'Symbiosis Institute of Business & Digital Media', 'CRITICAL_30_DAY', 27, 'Mandatory 10-Year deposit matures in 27 days. Send replacement/renewal advisory.', 'PENDING', datetime('now')),
         ('FDR-2016-1002', 'Vidyavardhaka College of Engineering', 'MATURITY_FULFILLED', -9, '10-Year lock-in completed. Two-Officer digital discharge ready for Member Secretary approval.', 'PENDING', datetime('now')),
         ('FDR-2022-1003', '[Simulated] Apex Institute of Applied Computing', 'DISCREPANCY_ALERT', 290, 'Bank CBS mismatch: 5y tenor vs 10y mandatory APH Table 1.4 norm. AICTE lien missing.', 'PENDING', datetime('now'))
     ''')

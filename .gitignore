@@ -28,6 +28,8 @@ backend/__pycache__/
 .idea
 .DS_Store
 Thumbs.db
+scratch/
+*.sqlite3-journal
 *.suo
 *.ntvs*
 *.njsproj

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, Upload, FileText, CheckCircle2, Clock, AlertTriangle, ShieldCheck, Plus, ArrowRight, IndianRupee } from 'lucide-react';
+import { Building2, Upload, CheckCircle2, AlertTriangle, Plus } from 'lucide-react';
 import { ExpiryChip, TrustStamp } from '../SignatureVisuals';
 import { APH_CONFIG } from '../../config/aph';
 
@@ -148,7 +148,10 @@ export default function CollegeDeskView({
     try {
       await fetch('http://127.0.0.1:8000/api/v1/instruments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('kosh_jwt_token') || ''}`
+        },
         body: JSON.stringify(newRecord)
       });
     } catch (err) {
