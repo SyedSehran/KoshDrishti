@@ -157,24 +157,24 @@ export default function HeaderGIGW({
 
       {/* 2. Simplified Main Header Bar */}
       <div style={{
-        padding: '12px 24px',
+        padding: '14px 28px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 16
       }}>
         {/* Left: Emblem + Name */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
-            width: 42,
-            height: 42,
+            width: 46,
+            height: 46,
             borderRadius: 'var(--radius-sm)',
             background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)',
             border: '1px solid #fde68a',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 22,
+            fontSize: 24,
             boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)'
           }}>
             🏛️
@@ -182,22 +182,22 @@ export default function HeaderGIGW({
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="serif-heading" style={{ fontSize: 17, fontWeight: 700, color: 'var(--ink-primary)' }}>
+              <span className="serif-heading" style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink-primary)' }}>
                 {language === 'hi' ? 'अखिल भारतीय तकनीकी शिक्षा परिषद' : 'All India Council for Technical Education'}
               </span>
-              <span className="badge-clean badge-warning" style={{ fontSize: 10, fontWeight: 700 }}>
+              <span className="badge-clean badge-warning" style={{ fontSize: 10.5, fontWeight: 700 }}>
                 APH 2024-27 Table 1.4
               </span>
-              <span className="badge-clean badge-active" style={{ fontSize: 10, fontWeight: 700 }}>
+              <span className="badge-clean badge-active" style={{ fontSize: 10.5, fontWeight: 700 }}>
                 RBI Scheduled Banks
               </span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 1 }}>
+            <div style={{ fontSize: 12, color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
               <span style={{ fontWeight: 600, color: 'var(--ink-secondary)' }}>
                 {language === 'hi' ? 'कोषदृष्टि (KoshDrishti) • सुरक्षा जमा एवं एफडीआर प्रबंधन पोर्टल' : 'KoshDrishti (कोषदृष्टि) • Security Deposit & FDR Management Portal'}
               </span>
               <span>•</span>
-              <span style={{ color: 'var(--stamp-bank-color)', fontWeight: 600, background: '#eff6ff', padding: '1px 6px', borderRadius: 4, border: '1px solid #bfdbfe' }}>
+              <span style={{ color: 'var(--stamp-bank-color)', fontWeight: 600, background: '#eff6ff', padding: '2px 7px', borderRadius: 4, border: '1px solid #bfdbfe', fontSize: 11.5 }}>
                 Bank verification (simulated)
               </span>
             </div>
@@ -205,15 +205,15 @@ export default function HeaderGIGW({
         </div>
 
         {/* Center: Search Field */}
-        <div style={{ flex: 1, maxWidth: 360, position: 'relative' }}>
-          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-muted)' }} />
+        <div style={{ flex: 1, maxWidth: 380, position: 'relative' }}>
+          <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-muted)' }} />
           <input
             type="text"
             className="input-paper"
             placeholder={language === 'hi' ? 'संस्थान, एफडीआर संख्या या बैंक खोजें...' : 'Search FDR #, Institute, Bank, or State...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ paddingLeft: 30, height: 34, fontSize: 12.5 }}
+            style={{ paddingLeft: 34, height: 38, fontSize: 13.5 }}
           />
         </div>
 
@@ -459,15 +459,15 @@ export default function HeaderGIGW({
       <div style={{
         background: 'linear-gradient(90deg, #f8f6f0 0%, #f1ece1 100%)',
         borderTop: '1px solid var(--border-subtle)',
-        padding: '6px 24px',
+        padding: '8px 28px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: 12,
+        gap: 14,
         overflowX: 'auto'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: 6 }}>
             Active Desk:
           </span>
 
@@ -486,14 +486,14 @@ export default function HeaderGIGW({
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
-                  padding: '5px 12px',
+                  gap: 8,
+                  padding: '7px 15px',
                   borderRadius: 'var(--radius-xs)',
                   background: isActive ? 'var(--ink-primary)' : '#ffffff',
                   color: isActive ? '#ffffff' : 'var(--ink-secondary)',
                   border: isActive ? '1px solid var(--ink-primary)' : '1px solid var(--border-medium)',
                   cursor: 'pointer',
-                  fontSize: 11.5,
+                  fontSize: 12.5,
                   fontWeight: isActive ? 700 : 500,
                   boxShadow: isActive ? '0 2px 6px rgba(15, 23, 42, 0.2)' : 'none',
                   transition: 'all 0.15s ease'
@@ -502,8 +502,8 @@ export default function HeaderGIGW({
                 <span>{role.icon}</span>
                 <span>{role.name}</span>
                 <span style={{
-                  fontSize: 9.5,
-                  padding: '1px 5px',
+                  fontSize: 10,
+                  padding: '2px 6px',
                   borderRadius: 3,
                   background: isActive ? 'rgba(255, 255, 255, 0.2)' : 'var(--bg-muted)',
                   color: isActive ? '#ffffff' : 'var(--ink-muted)',

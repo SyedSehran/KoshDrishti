@@ -49,24 +49,24 @@ export default function HeroRunwayAndMap({
   ];
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 16 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: 20 }}>
       {/* Hero Tile 1: 12-Month Maturity Runway */}
-      <div className="paper-card" style={{ padding: 20 }}>
+      <div className="paper-card" style={{ padding: 24 }}>
         {/* Top colored accent line */}
         <div style={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
-          height: 3.5,
+          height: 4,
           background: 'linear-gradient(90deg, #f59e0b 0%, #0ea5e9 33%, #10b981 66%, #8b5cf6 100%)'
         }} />
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
-              width: 26,
-              height: 26,
+              width: 30,
+              height: 30,
               borderRadius: 6,
               background: '#fef3c7',
               color: '#d97706',
@@ -74,22 +74,22 @@ export default function HeroRunwayAndMap({
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <Calendar size={15} />
+              <Calendar size={17} />
             </div>
-            <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--ink-primary)' }}>
+            <span style={{ fontSize: 14, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--ink-primary)' }}>
               12-Month Maturity Runway
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: 4 }}>
-            <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#fef3c7', color: '#d97706', fontWeight: 600 }}>Q3 Amber</span>
-            <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#e0f2fe', color: '#0284c7', fontWeight: 600 }}>Q4 Cyan</span>
-            <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#d1fae5', color: '#059669', fontWeight: 600 }}>Q1 Mint</span>
-            <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#f3e8ff', color: '#7c3aed', fontWeight: 600 }}>Q2 Violet</span>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <span style={{ fontSize: 11, padding: '3px 7px', borderRadius: 4, background: '#fef3c7', color: '#d97706', fontWeight: 600 }}>Q3 Amber</span>
+            <span style={{ fontSize: 11, padding: '3px 7px', borderRadius: 4, background: '#e0f2fe', color: '#0284c7', fontWeight: 600 }}>Q4 Cyan</span>
+            <span style={{ fontSize: 11, padding: '3px 7px', borderRadius: 4, background: '#d1fae5', color: '#059669', fontWeight: 600 }}>Q1 Mint</span>
+            <span style={{ fontSize: 11, padding: '3px 7px', borderRadius: 4, background: '#f3e8ff', color: '#7c3aed', fontWeight: 600 }}>Q2 Violet</span>
           </div>
         </div>
 
-        <p style={{ fontSize: 12, color: 'var(--ink-secondary)', marginBottom: 14 }}>
+        <p style={{ fontSize: 13, color: 'var(--ink-secondary)', marginBottom: 16 }}>
           Impending instrument maturities by calendar month. Click any month to filter table records below:
         </p>
 
@@ -97,7 +97,7 @@ export default function HeroRunwayAndMap({
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(6, 1fr)',
-          gap: 7
+          gap: 8
         }}>
           {runwayData.map((item, idx) => {
             const isSelected = activeMonthFilter === item.key;
@@ -123,11 +123,11 @@ export default function HeroRunwayAndMap({
                     ? '1.5px solid var(--ramp-vermilion-border)' 
                     : `1px solid ${item.border}`,
                   borderRadius: 'var(--radius-sm)',
-                  padding: '9px 4px',
+                  padding: '11px 6px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: 3,
+                  gap: 4,
                   cursor: 'pointer',
                   transition: 'all 0.18s ease',
                   boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.15)' : 'none'
@@ -145,13 +145,13 @@ export default function HeroRunwayAndMap({
                   }
                 }}
               >
-                <span style={{ fontSize: 10, fontWeight: 700, color: isSelected ? '#ffffff' : item.color }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: isSelected ? '#ffffff' : item.color }}>
                   {item.label}
                 </span>
-                <span className="mono" style={{ fontSize: 14, fontWeight: 800 }}>
+                <span className="mono" style={{ fontSize: 16, fontWeight: 800 }}>
                   {item.count}
                 </span>
-                <span className="mono" style={{ fontSize: 9.5, color: isSelected ? '#cbd5e1' : 'var(--ink-muted)' }}>
+                <span className="mono" style={{ fontSize: 10.5, color: isSelected ? '#cbd5e1' : 'var(--ink-muted)' }}>
                   {item.count > 0 ? `₹${item.amountLakhs}L` : '—'}
                 </span>
               </button>
@@ -196,22 +196,22 @@ export default function HeroRunwayAndMap({
       </div>
 
       {/* Hero Tile 2: Regional Office Distribution */}
-      <div className="paper-card" style={{ padding: 20 }}>
+      <div className="paper-card" style={{ padding: 24 }}>
         {/* Top colored accent line */}
         <div style={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
-          height: 3.5,
+          height: 4,
           background: 'linear-gradient(90deg, #d97706 0%, #7c3aed 20%, #0284c7 40%, #0d9488 60%, #e11d48 80%, #ea580c 100%)'
         }} />
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
-              width: 26,
-              height: 26,
+              width: 30,
+              height: 30,
               borderRadius: 6,
               background: '#e0f2fe',
               color: '#0284c7',
@@ -219,24 +219,24 @@ export default function HeroRunwayAndMap({
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <MapPin size={15} />
+              <MapPin size={17} />
             </div>
-            <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--ink-primary)' }}>
+            <span style={{ fontSize: 14, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--ink-primary)' }}>
               Regional Office Distribution
             </span>
           </div>
 
-          <span className="mono" style={{ fontSize: 11, color: 'var(--ink-muted)' }}>
+          <span className="mono" style={{ fontSize: 12, color: 'var(--ink-muted)' }}>
             7 AICTE Bureaus
           </span>
         </div>
 
-        <p style={{ fontSize: 12, color: 'var(--ink-secondary)', marginBottom: 14 }}>
+        <p style={{ fontSize: 13, color: 'var(--ink-secondary)', marginBottom: 16 }}>
           Active deposits across India (data.gov.in scale). Click any region to filter:
         </p>
 
         {/* Region List with Colorful Badges */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {regions.map(r => {
             const isSelected = selectedRegion === r.name;
             return (
@@ -247,7 +247,7 @@ export default function HeroRunwayAndMap({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '7px 12px',
+                  padding: '9px 14px',
                   borderRadius: 'var(--radius-sm)',
                   background: isSelected ? r.bg : '#ffffff',
                   border: isSelected ? `2px solid ${r.color}` : `1px solid ${r.border}`,
@@ -267,27 +267,27 @@ export default function HeroRunwayAndMap({
                   }
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{
-                    width: 8,
-                    height: 8,
+                    width: 9,
+                    height: 9,
                     borderRadius: '50%',
                     background: r.color,
                     flexShrink: 0
                   }} />
-                  <span style={{ fontSize: 12, fontWeight: isSelected ? 700 : 600, color: 'var(--ink-primary)' }}>
+                  <span style={{ fontSize: 13, fontWeight: isSelected ? 700 : 600, color: 'var(--ink-primary)' }}>
                     {r.name} Bureau
                   </span>
-                  <span style={{ fontSize: 10.5, color: 'var(--ink-muted)' }}>
+                  <span style={{ fontSize: 11.5, color: 'var(--ink-muted)' }}>
                     ({r.states})
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: r.color }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: r.color }}>
                     {r.count} deposits
                   </span>
-                  {isSelected && <span style={{ fontSize: 10.5, color: r.color, fontWeight: 700 }}>✓ Filtered</span>}
+                  {isSelected && <span style={{ fontSize: 11, color: r.color, fontWeight: 700 }}>✓ Filtered</span>}
                 </div>
               </div>
             );

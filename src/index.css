@@ -135,7 +135,7 @@ body {
   background-attachment: fixed;
   color: var(--ink-primary);
   font-family: var(--font-sans);
-  font-size: 13.5px;
+  font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
@@ -163,6 +163,7 @@ h1, h2, h3, h4, .serif-heading {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
+  padding: 24px;
 }
 
 .paper-card:hover {
@@ -176,11 +177,11 @@ h1, h2, h3, h4, .serif-heading {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 8px 16px;
+  gap: 8px;
+  padding: 9px 18px;
   border-radius: var(--radius-sm);
   font-family: var(--font-sans);
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
@@ -235,8 +236,8 @@ h1, h2, h3, h4, .serif-heading {
 }
 
 .btn-sm {
-  padding: 5px 12px;
-  font-size: 11.5px;
+  padding: 6px 14px;
+  font-size: 12.5px;
   border-radius: var(--radius-xs);
 }
 
@@ -244,10 +245,10 @@ h1, h2, h3, h4, .serif-heading {
 .ramp-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3.5px 9px;
+  gap: 7px;
+  padding: 4.5px 11px;
   border-radius: var(--radius-full);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   font-family: var(--font-mono);
   letter-spacing: -0.01em;
@@ -255,8 +256,8 @@ h1, h2, h3, h4, .serif-heading {
 }
 
 .ramp-dot {
-  width: 6.5px;
-  height: 6.5px;
+  width: 7.5px;
+  height: 7.5px;
   border-radius: 50%;
   flex-shrink: 0;
   animation: pulseLight 2s infinite ease-in-out;
@@ -308,10 +309,10 @@ h1, h2, h3, h4, .serif-heading {
 .trust-stamp {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 2.5px 8px;
+  gap: 6px;
+  padding: 3.5px 10px;
   border-radius: var(--radius-xs);
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -340,10 +341,10 @@ h1, h2, h3, h4, .serif-heading {
 .badge-clean {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3.5px 9px;
+  gap: 5px;
+  padding: 4.5px 10px;
   border-radius: var(--radius-xs);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
   border: 1px solid transparent;
 }
@@ -389,22 +390,22 @@ h1, h2, h3, h4, .serif-heading {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 13px;
+  font-size: 13.5px;
 }
 
 .paper-table th {
   background: var(--bg-muted);
   border-bottom: 2px solid var(--border-medium);
-  padding: 11px 16px;
+  padding: 13px 18px;
   color: var(--ink-secondary);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .paper-table td {
-  padding: 13px 16px;
+  padding: 15px 18px;
   border-bottom: 1px solid var(--border-subtle);
   color: var(--ink-primary);
   background: #ffffff;
@@ -417,13 +418,13 @@ h1, h2, h3, h4, .serif-heading {
 /* Form Controls */
 .input-paper {
   width: 100%;
-  padding: 8px 12px;
+  padding: 9px 14px;
   background: #ffffff;
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
   color: var(--ink-primary);
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 13.5px;
   outline: none;
   transition: all 0.15s ease;
 }

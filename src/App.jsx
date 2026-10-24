@@ -207,7 +207,7 @@ export default function App() {
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      fontSize: textSize === 'sm' ? 12.5 : textSize === 'lg' ? 14.5 : 13.5
+      fontSize: textSize === 'sm' ? 14 : textSize === 'lg' ? 17 : 15.5
     }}>
       {/* 1. GIGW Compliant Header */}
       <HeaderGIGW
@@ -224,17 +224,17 @@ export default function App() {
       />
 
       {/* Main Canvas Container */}
-      <main style={{ flex: 1, padding: '24px', maxWidth: 1400, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <main style={{ flex: 1, padding: '28px 32px', maxWidth: 1560, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 28 }}>
         {/* Transparent Regulatory Disclosure Banner */}
         <div style={{
           background: 'var(--bg-muted)',
           border: '1px solid var(--border-medium)',
           borderRadius: 'var(--radius-sm)',
-          padding: '8px 14px',
+          padding: '10px 16px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          fontSize: 11.5,
+          fontSize: 12.5,
           color: 'var(--ink-secondary)'
         }}>
           <div>

@@ -64,27 +64,27 @@ export default function TableWithDrawer({
   const uniqueBanks = Array.from(new Set(records.map(r => r.issuingBank))).filter(Boolean);
 
   return (
-    <div className="paper-card" style={{ padding: 20 }}>
+    <div className="paper-card" style={{ padding: 24 }}>
       {/* Table Top Controls & Filters */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: 12,
-        marginBottom: 16
+        gap: 14,
+        marginBottom: 20
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <h3 className="serif-heading" style={{ fontSize: 16, color: 'var(--ink-primary)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h3 className="serif-heading" style={{ fontSize: 18, color: 'var(--ink-primary)' }}>
             Instrument Master Register
           </h3>
-          <span className="mono" style={{ fontSize: 11, color: 'var(--ink-muted)' }}>
+          <span className="mono" style={{ fontSize: 12, color: 'var(--ink-muted)' }}>
             Showing {filtered.length} of {records.length} records
           </span>
         </div>
 
         {/* Filter controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           {/* Status selector */}
           <select
             className="input-paper"
@@ -93,7 +93,7 @@ export default function TableWithDrawer({
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
-            style={{ width: 130, height: 32, fontSize: 11.5 }}
+            style={{ width: 140, height: 36, fontSize: 12.5 }}
           >
             <option value="ALL">All Statuses</option>
             <option value="Active">Active</option>
@@ -112,7 +112,7 @@ export default function TableWithDrawer({
               setRegionFilter(e.target.value);
               setCurrentPage(1);
             }}
-            style={{ width: 130, height: 32, fontSize: 11.5 }}
+            style={{ width: 140, height: 36, fontSize: 12.5 }}
           >
             <option value="ALL">All Regions</option>
             <option value="Northern">Northern</option>
@@ -132,7 +132,7 @@ export default function TableWithDrawer({
               setBankFilter(e.target.value);
               setCurrentPage(1);
             }}
-            style={{ width: 150, height: 32, fontSize: 11.5 }}
+            style={{ width: 160, height: 36, fontSize: 12.5 }}
           >
             <option value="ALL">All Banks</option>
             {uniqueBanks.map(b => (
@@ -145,7 +145,7 @@ export default function TableWithDrawer({
             className="input-paper"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            style={{ width: 150, height: 32, fontSize: 11.5 }}
+            style={{ width: 160, height: 36, fontSize: 12.5 }}
           >
             <option value="amount_desc">Amount (Highest)</option>
             <option value="amount_asc">Amount (Lowest)</option>
@@ -186,26 +186,26 @@ export default function TableWithDrawer({
                 >
                   {/* Instrument & Trust Stamp */}
                   <td>
-                    <div className="mono" style={{ fontWeight: 700, color: 'var(--ink-primary)', fontSize: 12.5 }}>
+                    <div className="mono" style={{ fontWeight: 700, color: 'var(--ink-primary)', fontSize: 14 }}>
                       {item.fdrNumber}
                     </div>
                     <div style={{ marginTop: 4 }}>
                       <TrustStamp level={item.trustLevel || 'officer'} size="sm" />
                     </div>
-                    <div style={{ fontSize: 10, color: 'var(--ink-muted)', marginTop: 3 }}>
+                    <div style={{ fontSize: 11.5, color: 'var(--ink-muted)', marginTop: 3 }}>
                       {item.issuingBank}
                     </div>
                   </td>
 
                   {/* Institution */}
                   <td>
-                    <div style={{ fontWeight: 600, color: 'var(--ink-primary)', lineHeight: 1.3 }}>
+                    <div style={{ fontWeight: 600, color: 'var(--ink-primary)', lineHeight: 1.3, fontSize: 14.5 }}>
                       {item.institutionName}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--ink-secondary)', marginTop: 2 }}>
+                    <div style={{ fontSize: 12, color: 'var(--ink-secondary)', marginTop: 2 }}>
                       {item.city}, {item.state} • <span className="mono">{item.institutionId}</span>
                     </div>
-                    <div style={{ fontSize: 10, color: 'var(--ink-muted)', marginTop: 2 }}>
+                    <div style={{ fontSize: 11, color: 'var(--ink-muted)', marginTop: 2 }}>
                       {item.programType}
                     </div>
                   </td>
@@ -214,17 +214,17 @@ export default function TableWithDrawer({
                   <td>
                     {item.isGovernmentExempt ? (
                       <div>
-                        <span className="mono" style={{ fontWeight: 700, color: 'var(--ramp-jade-text)', fontSize: 13 }}>
+                        <span className="mono" style={{ fontWeight: 700, color: 'var(--ramp-jade-text)', fontSize: 14.5 }}>
                           ₹ 0
                         </span>
-                        <div style={{ fontSize: 10, color: 'var(--ink-muted)' }}>Govt exempt</div>
+                        <div style={{ fontSize: 11, color: 'var(--ink-muted)' }}>Govt exempt</div>
                       </div>
                     ) : (
                       <div>
-                        <span className="mono" style={{ fontWeight: 700, color: 'var(--ink-primary)', fontSize: 13 }}>
+                        <span className="mono" style={{ fontWeight: 700, color: 'var(--ink-primary)', fontSize: 14.5 }}>
                           ₹ {(item.amount / 100000).toFixed(1)} Lakhs
                         </span>
-                        <div style={{ fontSize: 10, color: 'var(--ink-muted)' }}>
+                        <div style={{ fontSize: 11, color: 'var(--ink-muted)' }}>
                           ₹ {item.amount.toLocaleString('en-IN')}
                         </div>
                       </div>
@@ -234,17 +234,17 @@ export default function TableWithDrawer({
                   {/* Validity Ramp */}
                   <td>
                     <ExpiryChip days={item.daysRemaining} />
-                    <div className="mono" style={{ fontSize: 10, color: 'var(--ink-muted)', marginTop: 4 }}>
+                    <div className="mono" style={{ fontSize: 11, color: 'var(--ink-muted)', marginTop: 4 }}>
                       {item.maturityDate}
                     </div>
                   </td>
 
                   {/* OCR Match % */}
                   <td>
-                    <div className="mono" style={{ fontWeight: 700, fontSize: 12.5, color: 'var(--ink-primary)' }} title="Automated text extraction accuracy between uploaded document and bank record">
+                    <div className="mono" style={{ fontWeight: 700, fontSize: 14, color: 'var(--ink-primary)' }} title="Automated text extraction accuracy between uploaded document and bank record">
                       {item.ocrMatchPct || 98.4}%
                     </div>
-                    <div style={{ fontSize: 10, color: 'var(--ink-muted)' }}>
+                    <div style={{ fontSize: 11, color: 'var(--ink-muted)' }}>
                       Tesseract/Paddle
                     </div>
                   </td>
