@@ -1,0 +1,527 @@
+/* ==========================================================================
+   AICTE VISHWAS-FDR • Vibrant Sovereign Regulatory Design System
+   Rich, Colorful, Atmospheric Paper & Ink with Multi-Hue Ambient Mesh
+   Strictly Zero Navy Cliché / Zero Plain Dark Green / Zero Plain Red
+   ========================================================================== */
+
+:root {
+  /* Surface Tokens */
+  --bg-canvas: #f6f5f0;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #ffffff;
+  --bg-muted: #f0ece3;
+  --bg-subtle: #faf8f5;
+  --border-subtle: #e5ded3;
+  --border-medium: #d4cbbf;
+  --border-strong: #1e293b;
+
+  /* Typography */
+  --font-serif: 'Noto Serif', Georgia, Cambria, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', Menlo, Consolas, monospace;
+  --font-devanagari: 'Noto Sans Devanagari', sans-serif;
+
+  /* Ink Text Tokens */
+  --ink-primary: #0f172a;
+  --ink-secondary: #334155;
+  --ink-muted: #64748b;
+  --ink-dim: #94a3b8;
+
+  /* Vibrant Color Accents (Harmonious Multi-Hue) */
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-light: #fef3c7;
+  --color-amber-border: #fde68a;
+
+  --color-cyan-500: #0ea5e9;
+  --color-cyan-600: #0284c7;
+  --color-cyan-light: #e0f2fe;
+  --color-cyan-border: #bae6fd;
+
+  --color-teal-500: #14b8a6;
+  --color-teal-600: #0d9488;
+  --color-teal-light: #ccfbf1;
+  --color-teal-border: #99f6e4;
+
+  --color-violet-500: #8b5cf6;
+  --color-violet-600: #7c3aed;
+  --color-violet-light: #f3e8ff;
+  --color-violet-border: #e9d5ff;
+
+  --color-rose-500: #f43f5e;
+  --color-rose-600: #e11d48;
+  --color-rose-light: #ffe4e6;
+  --color-rose-border: #fecdd3;
+
+  --color-coral-500: #f97316;
+  --color-coral-600: #ea580c;
+  --color-coral-light: #ffedd5;
+  --color-coral-border: #fed7aa;
+
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-light: #d1fae5;
+  --color-emerald-border: #a7f3d0;
+
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-light: #dbeafe;
+  --color-blue-border: #bfdbfe;
+
+  /* Signature Validity Ramp Tokens */
+  --ramp-jade-text: #065f46;
+  --ramp-jade-bg: #ecfdf5;
+  --ramp-jade-border: #a7f3d0;
+  --ramp-jade-dot: #10b981;
+
+  --ramp-turmeric-text: #92400e;
+  --ramp-turmeric-bg: #fffbeb;
+  --ramp-turmeric-border: #fde68a;
+  --ramp-turmeric-dot: #f59e0b;
+
+  --ramp-vermilion-text: #991b1b;
+  --ramp-vermilion-bg: #fef2f2;
+  --ramp-vermilion-border: #fecaca;
+  --ramp-vermilion-dot: #f43f5e;
+
+  --ramp-black-text: #1e293b;
+  --ramp-black-bg: #f1f5f9;
+  --ramp-black-border: #cbd5e1;
+  --ramp-black-dot: #334155;
+
+  /* Trust Stamp Tokens */
+  --stamp-bank-color: #1d4ed8;
+  --stamp-bank-bg: #eff6ff;
+  --stamp-bank-border: #93c5fd;
+
+  --stamp-officer-color: #6d28d9;
+  --stamp-officer-bg: #f5f3ff;
+  --stamp-officer-border: #c4b5fd;
+
+  --stamp-declared-color: #b45309;
+  --stamp-declared-bg: #fffbeb;
+  --stamp-declared-border: #fcd34d;
+
+  /* Elevations */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.04), 0 8px 20px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.08), 0 3px 8px rgba(0, 0, 0, 0.04);
+  --shadow-drawer: -6px 0 30px rgba(15, 23, 42, 0.16);
+  --shadow-modal: 0 24px 50px rgba(15, 23, 42, 0.18);
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+}
+
+/* Base Setup */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.10) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.10) 0px, transparent 50%),
+    radial-gradient(at 50% 40%, rgba(139, 92, 246, 0.06) 0px, transparent 60%),
+    radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.09) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(244, 63, 94, 0.07) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Typography Classes */
+h1, h2, h3, h4, .serif-heading {
+  font-family: var(--font-serif);
+  color: var(--ink-primary);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
+}
+
+/* Vibrant Paper Cards */
+.paper-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.paper-card:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+
+/* Buttons with Rich Pigment */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-ink-primary {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+}
+.btn-ink-primary:hover {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+}
+
+.btn-paper {
+  background: #ffffff;
+  color: var(--ink-primary);
+  border: 1px solid var(--border-medium);
+}
+.btn-paper:hover {
+  background: var(--bg-muted);
+  border-color: var(--ink-primary);
+}
+
+.btn-secondary {
+  background: var(--bg-muted);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border-subtle);
+}
+.btn-secondary:hover {
+  background: #e8e3d8;
+  color: var(--ink-primary);
+}
+
+.btn-vibrant-amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
+}
+.btn-vibrant-amber:hover {
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 11.5px;
+  border-radius: var(--radius-xs);
+}
+
+/* Signature Component 1: Validity Ramp Chip */
+.ramp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3.5px 9px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.ramp-dot {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulseLight 2s infinite ease-in-out;
+}
+
+@keyframes pulseLight {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.ramp-jade {
+  background: var(--ramp-jade-bg);
+  color: var(--ramp-jade-text);
+  border: 1px solid var(--ramp-jade-border);
+}
+.ramp-jade .ramp-dot {
+  background: var(--ramp-jade-dot);
+}
+
+.ramp-turmeric {
+  background: var(--ramp-turmeric-bg);
+  color: var(--ramp-turmeric-text);
+  border: 1px solid var(--ramp-turmeric-border);
+}
+.ramp-turmeric .ramp-dot {
+  background: var(--ramp-turmeric-dot);
+}
+
+.ramp-vermilion {
+  background: var(--ramp-vermilion-bg);
+  color: var(--ramp-vermilion-text);
+  border: 1px solid var(--ramp-vermilion-border);
+}
+.ramp-vermilion .ramp-dot {
+  background: var(--ramp-vermilion-dot);
+}
+
+.ramp-black {
+  background: var(--ramp-black-bg);
+  color: var(--ramp-black-text);
+  border: 1px solid var(--ramp-black-border);
+}
+.ramp-black .ramp-dot {
+  background: var(--ramp-black-dot);
+}
+
+/* Signature Component 2: Trust Stamp */
+.trust-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2.5px 8px;
+  border-radius: var(--radius-xs);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.stamp-bank {
+  background: var(--stamp-bank-bg);
+  color: var(--stamp-bank-color);
+  border: 1px solid var(--stamp-bank-border);
+}
+
+.stamp-officer {
+  background: var(--stamp-officer-bg);
+  color: var(--stamp-officer-color);
+  border: 1px solid var(--stamp-officer-border);
+}
+
+.stamp-declared {
+  background: var(--stamp-declared-bg);
+  color: var(--stamp-declared-color);
+  border: 1px solid var(--stamp-declared-border);
+}
+
+/* Status Badges */
+.badge-clean {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3.5px 9px;
+  border-radius: var(--radius-xs);
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.badge-active {
+  background: var(--color-emerald-light);
+  color: var(--color-emerald-600);
+  border-color: var(--color-emerald-border);
+}
+
+.badge-warning {
+  background: var(--color-amber-light);
+  color: var(--color-amber-600);
+  border-color: var(--color-amber-border);
+}
+
+.badge-flagged {
+  background: var(--color-rose-light);
+  color: var(--color-rose-600);
+  border-color: var(--color-rose-border);
+}
+
+.badge-release {
+  background: var(--color-blue-light);
+  color: var(--color-blue-600);
+  border-color: var(--color-blue-border);
+}
+
+.badge-violet {
+  background: var(--color-violet-light);
+  color: var(--color-violet-600);
+  border-color: var(--color-violet-border);
+}
+
+.badge-released {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+/* Table Design (Clean Paper Ledger with Rich Accents) */
+.paper-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.paper-table th {
+  background: var(--bg-muted);
+  border-bottom: 2px solid var(--border-medium);
+  padding: 11px 16px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.paper-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-primary);
+  background: #ffffff;
+}
+
+.paper-table tr:hover td {
+  background: #fdfcf9;
+}
+
+/* Form Controls */
+.input-paper {
+  width: 100%;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.input-paper:focus {
+  border-color: var(--color-amber-500);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+select.input-paper {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+  padding-right: 32px;
+}
+
+/* Slide-Over Drawer */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn 0.15s ease;
+}
+
+.drawer-panel {
+  width: 100%;
+  max-width: 620px;
+  height: 100vh;
+  background: var(--bg-surface);
+  border-left: 1.5px solid var(--border-medium);
+  box-shadow: -10px 0 35px rgba(15, 23, 42, 0.22);
+  display: flex;
+  flex-direction: column;
+  animation: slideLeft 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+  position: relative;
+  z-index: 10000;
+}
+
+/* Centered Modal Backdrop */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.15s ease;
+}
+
+.modal-dialog {
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: popUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes popUp {
+  from { transform: scale(0.97); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* GIGW Official Top Bar */
+.gigw-masthead {
+  background: linear-gradient(90deg, #f3efe6 0%, #ede8de 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 4px 24px;
+  font-size: 11px;
+  color: var(--ink-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
