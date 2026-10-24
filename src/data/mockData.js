@@ -11,11 +11,10 @@ export const APH_NORMS_CATALOG = [
   { program: "Computer Applications (PG - MCA)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
   { program: "Computer Applications (UG - BCA)", minAmountLakhs: 5, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
   { program: "Planning (Diploma / UG / PG)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
-  { program: "Applied Arts & Crafts", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
+  { program: "Applied Arts & Crafts (All Levels)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
   { program: "Design (All Levels)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
   { program: "Hotel Management & Catering (HMCT)", minAmountLakhs: 15, lockInYears: 10, jointLienMandatory: true, category: "Private/Self-Financed", exemptionAllowed: false },
-  { program: "Pharmacy & Architecture (Not in Table 1.4)", minAmountLakhs: 0, lockInYears: 0, jointLienMandatory: false, category: "PCI / CoA Statutory Regulators", exemptionAllowed: true, exemptionClause: "Governed by PCI / CoA Acts, not in AICTE Table 1.4" },
-  { program: "Government / University Dept (All)", minAmountLakhs: 0, lockInYears: 0, jointLienMandatory: false, category: "Government / Constituent", exemptionAllowed: true, exemptionClause: "APH 2024-27 Table 1.4 Clause (c) - Exempt with Mandated Govt Affidavit" }
+  { program: "Government / University Constituent (All)", minAmountLakhs: 0, lockInYears: 0, jointLienMandatory: false, category: "Government / Constituent", exemptionAllowed: true, exemptionClause: "APH 2024-27 Table 1.4 Clause (c) - Exempt with Mandated Govt Affidavit" }
 ];
 
 export const MOCK_BANK_CATALOG = [

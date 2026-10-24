@@ -219,9 +219,19 @@ MANDATORY LIEN MARKED IN FAVOUR OF AICTE REGULATION BUREAU`;
                   value={selectedProgram}
                   onChange={(e) => handleProgramChange(e.target.value)}
                 >
-                  {APH_NORMS_CATALOG.map(n => (
-                    <option key={n.program} value={n.program}>{n.program}</option>
-                  ))}
+                  <optgroup label="AICTE APH 2024-27 Table 1.4 Covered Programs">
+                    {APH_NORMS_CATALOG.map(n => (
+                      <option key={n.program} value={n.program}>{n.program}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Excluded Regulators (Not Covered by AICTE Table 1.4)">
+                    <option value="Pharmacy" disabled>
+                      Pharmacy (B.Pharm / M.Pharm) — Governed by PCI (Not Applicable)
+                    </option>
+                    <option value="Architecture" disabled>
+                      Architecture (B.Arch / M.Arch) — Governed by CoA (Not Applicable)
+                    </option>
+                  </optgroup>
                 </select>
               </div>
 

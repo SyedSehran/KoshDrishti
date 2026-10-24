@@ -62,13 +62,11 @@ TABLE_1_4_NORMS = {
     "Engineering & Technology (Diploma)": {"minAmount": 1500000, "tenorYears": 10},
     "Engineering & Technology (PG)": {"minAmount": 1500000, "tenorYears": 10},
     "Management (PG - MBA/PGDM)": {"minAmount": 1500000, "tenorYears": 10},
-    "Management (MBA / PGDM)": {"minAmount": 1500000, "tenorYears": 10},
     "Management (UG - BBA)": {"minAmount": 500000, "tenorYears": 10},
     "Computer Applications (PG - MCA)": {"minAmount": 1500000, "tenorYears": 10},
     "Computer Applications (UG - BCA)": {"minAmount": 500000, "tenorYears": 10},
     "Planning (Diploma / UG / PG)": {"minAmount": 1500000, "tenorYears": 10},
     "Applied Arts & Crafts (All Levels)": {"minAmount": 1500000, "tenorYears": 10},
-    "Applied Arts & Crafts": {"minAmount": 1500000, "tenorYears": 10},
     "Design (All Levels)": {"minAmount": 1500000, "tenorYears": 10},
     "Hotel Management & Catering (HMCT)": {"minAmount": 1500000, "tenorYears": 10},
     "Government / University Constituent (All)": {"minAmount": 0, "tenorYears": 0, "isGovt": True}
@@ -78,20 +76,27 @@ def get_server_aph_norm(program):
     """
     Derives mandatory deposit amount and tenor strictly from server-side Table 1.4 rules.
     Prevents untrusted clients from injecting minAmount: 0.
+    Returns None if program is unknown or not covered by Table 1.4 (e.g. Pharmacy/Architecture).
     """
     if not program or not isinstance(program, str):
-        return {"minAmount": 3500000, "tenorYears": 10, "program": "Engineering & Technology (UG)"}
+        return None
     
     prog_clean = program.strip()
-    if "government" in prog_clean.lower():
-        return {"minAmount": 0, "tenorYears": 0, "isGovt": True}
+    prog_lower = prog_clean.lower()
+
+    # Explicit exclusion check: Pharmacy and Architecture are governed separately by PCI / CoA
+    if "pharmacy" in prog_lower or "architecture" in prog_lower:
+        return None
+
+    if "government" in prog_lower or "constituent" in prog_lower:
+        return {"minAmount": 0, "tenorYears": 0, "isGovt": True, "program": "Government / University Constituent (All)"}
     
     # Exact lookup
     for prog_key, norm in TABLE_1_4_NORMS.items():
-        if prog_key.lower() == prog_clean.lower():
+        if prog_key.lower() == prog_lower:
             return {**norm, "program": prog_key}
             
-    prog_lower = prog_clean.lower()
+    # Alias / subtype lookups strictly within Table 1.4
     if "bba" in prog_lower:
         return {"minAmount": 500000, "tenorYears": 10, "program": "Management (UG - BBA)"}
     elif "bca" in prog_lower:
@@ -100,7 +105,7 @@ def get_server_aph_norm(program):
         return {"minAmount": 1500000, "tenorYears": 10, "program": "Engineering & Technology (Diploma)"}
     elif "management" in prog_lower or "mba" in prog_lower or "pgdm" in prog_lower:
         return {"minAmount": 1500000, "tenorYears": 10, "program": "Management (PG - MBA/PGDM)"}
-    elif "computer" in prog_lower or "mca" in prog_lower:
+    elif "mca" in prog_lower:
         return {"minAmount": 1500000, "tenorYears": 10, "program": "Computer Applications (PG - MCA)"}
     elif "planning" in prog_lower:
         return {"minAmount": 1500000, "tenorYears": 10, "program": "Planning (Diploma / UG / PG)"}
@@ -110,12 +115,12 @@ def get_server_aph_norm(program):
         return {"minAmount": 1500000, "tenorYears": 10, "program": "Design (All Levels)"}
     elif "hotel" in prog_lower or "hmct" in prog_lower:
         return {"minAmount": 1500000, "tenorYears": 10, "program": "Hotel Management & Catering (HMCT)"}
-    elif "engineering" in prog_lower:
-        if "pg" in prog_lower or "m.tech" in prog_lower:
+    elif "engineering" in prog_lower or "technology" in prog_lower:
+        if "pg" in prog_lower or "m.tech" in prog_lower or "me" in prog_lower:
             return {"minAmount": 1500000, "tenorYears": 10, "program": "Engineering & Technology (PG)"}
         return {"minAmount": 3500000, "tenorYears": 10, "program": "Engineering & Technology (UG)"}
         
-    return {"minAmount": 3500000, "tenorYears": 10, "program": "Engineering & Technology (UG)"}
+    return None
 
 # Helper: Append to Cryptographic SHA-256 Hash-Chained Ledger
 def append_to_ledger(action, actor, fdr_id, details):
@@ -680,6 +685,16 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             self._set_headers(401)
             self.wfile.write(json.dumps({"error": "Unauthorized or expired token"}).encode('utf-8'))
 
+        # 7. Statutory APH Table 1.4 Authority Endpoint
+        elif path == "/api/v1/aph" or path == "/api/v1/aph/table-1-4":
+            self._set_headers(200)
+            self.wfile.write(json.dumps({
+                "source": "AICTE Approval Process Handbook (APH 2024-27 Table 1.4)",
+                "mandatoryTenorYears": 10,
+                "leasedBuildingMultiplier": 2,
+                "norms": TABLE_1_4_NORMS
+            }).encode('utf-8'))
+
         else:
             self._set_headers(404)
             self.wfile.write(json.dumps({"error": "Endpoint not found"}).encode('utf-8'))
@@ -785,6 +800,15 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             program_name = inst_data.get("programType") or inst_data.get("program") or payload.get("program") or ""
             aph_norm = get_server_aph_norm(program_name)
 
+            if not aph_norm:
+                self._set_headers(400)
+                self.wfile.write(json.dumps({
+                    "error": f"Program '{program_name}' is not covered by AICTE APH Table 1.4 (Pharmacy & Architecture are governed separately by PCI/CoA).",
+                    "code": "PROGRAM_NOT_IN_TABLE_1_4",
+                    "covered_by_table_1_4": False
+                }).encode('utf-8'))
+                return
+
             result = compute_rule_compliance_score(inst_data, bank_rec, aph_norm)
             self._set_headers(200)
             self.wfile.write(json.dumps(result).encode('utf-8'))
@@ -831,12 +855,12 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             self._set_headers(200)
             self.wfile.write(json.dumps({"success": True, "message": "Alert scan executed successfully"}).encode('utf-8'))
 
-        # 7. Auth Login (Per-user cryptographic salt)
+        # 7. Auth Login (Cryptographic PBKDF2-HMAC per-user salt)
         elif path == "/api/v1/auth/login":
             email = payload.get("email", "").strip().lower()
             password = payload.get("password", "")
-            salt = hashlib.sha256(email.encode()).hexdigest()[:16]
-            pw_hash = hashlib.sha256(f"{salt}:{password}:{salt}".encode()).hexdigest()
+            salt = hashlib.sha256(email.encode('utf-8')).digest()
+            pw_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000).hex()
 
             conn = get_db()
             c = conn.cursor()

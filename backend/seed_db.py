@@ -16,12 +16,12 @@ REAL_INSTITUTIONS_BASE = [
     {"name": "Vidyavardhaka College of Engineering", "trust": "Vidyavardhaka Sangha Trust", "city": "Mysuru", "state": "Karnataka", "region": "South-Western", "program": "Engineering & Technology (UG)"},
     {"name": "College of Engineering, Guindy", "trust": "Government of Tamil Nadu", "city": "Chennai", "state": "Tamil Nadu", "region": "Southern", "program": "Government / University Constituent (All)", "isGovt": True},
     {"name": "Amrita School of Engineering & Technology", "trust": "Mata Amritanandamayi Math", "city": "Coimbatore", "state": "Tamil Nadu", "region": "Southern", "program": "Engineering & Technology (UG)"},
-    {"name": "Symbiosis Institute of Business & Digital Media", "trust": "Symbiosis International Society", "city": "Pune", "state": "Maharashtra", "region": "Western", "program": "Management (MBA / PGDM)"},
+    {"name": "Symbiosis Institute of Business & Digital Media", "trust": "Symbiosis International Society", "city": "Pune", "state": "Maharashtra", "region": "Western", "program": "Management (PG - MBA/PGDM)"},
     {"name": "BMS College of Engineering", "trust": "BMS Educational Trust", "city": "Bengaluru", "state": "Karnataka", "region": "South-Western", "program": "Engineering & Technology (UG)"},
     {"name": "PSG College of Technology", "trust": "PSG & Sons Charities Trust", "city": "Coimbatore", "state": "Tamil Nadu", "region": "Southern", "program": "Engineering & Technology (UG)"},
     {"name": "Thapar Institute of Advanced Research", "trust": "Thapar Educational Society", "city": "Patiala", "state": "Punjab", "region": "North-West", "program": "Engineering & Technology (UG)"},
     {"name": "Vellore Institute of Technology Campus", "trust": "Vellore Educational Trust", "city": "Vellore", "state": "Tamil Nadu", "region": "Southern", "program": "Engineering & Technology (UG)"},
-    {"name": "Birla Institute of Applied Management", "trust": "Birla Academy of Art and Culture", "city": "Kolkata", "state": "West Bengal", "region": "Eastern", "program": "Management (MBA / PGDM)"},
+    {"name": "Birla Institute of Applied Management", "trust": "Birla Academy of Art and Culture", "city": "Kolkata", "state": "West Bengal", "region": "Eastern", "program": "Management (PG - MBA/PGDM)"},
     {"name": "Government College of Engineering, Pune", "trust": "State Govt of Maharashtra", "city": "Pune", "state": "Maharashtra", "region": "Western", "program": "Government / University Constituent (All)", "isGovt": True},
     {"name": "Delhi Technological University Campus", "trust": "Govt of NCT of Delhi", "city": "New Delhi", "state": "Delhi", "region": "Northern", "program": "Government / University Constituent (All)", "isGovt": True},
     {"name": "Manipal Institute of Design & Media", "trust": "Academy of General Education", "city": "Manipal", "state": "Karnataka", "region": "South-Western", "program": "Design (All Levels)"},
@@ -142,10 +142,10 @@ def seed_database():
         )
     ''')
 
-    # Seed demo users with per-user dynamic cryptographic salt
+    # Seed demo users with per-user dynamic PBKDF2-HMAC cryptographic salt
     def hash_pw(email, pw):
-        salt = hashlib.sha256(email.strip().lower().encode()).hexdigest()[:16]
-        return hashlib.sha256(f"{salt}:{pw}:{salt}".encode()).hexdigest()
+        salt = hashlib.sha256(email.strip().lower().encode('utf-8')).digest()
+        return hashlib.pbkdf2_hmac('sha256', pw.encode('utf-8'), salt, 100000).hex()
 
     demo_users = [
         ("officer@aicte.gov.in", hash_pw("officer@aicte.gov.in", "Officer@123"), "Rajesh Sharma", "bureau_officer", "Regulation Bureau"),
@@ -230,11 +230,11 @@ def seed_database():
         INSERT INTO instruments VALUES (
             'FDR-2018-1005', 'FDR/HDFC/883920191', '1-10492814',
             'Symbiosis Institute of Business & Digital Media', 'Symbiosis International Society',
-            'Western', 'Maharashtra', 'Pune', 'Management (MBA / PGDM)',
+            'Western', 'Maharashtra', 'Pune', 'Management (PG - MBA/PGDM)',
             1500000, 'HDFC Bank', 'Private Sector Scheduled', 'HDFC0001092',
             '40192830115', '2016-11-20', '2026-11-20', 10, 27,
             'Member Secretary, AICTE & President, Symbiosis', 1, 1, 'bank', 99.1,
-            'Expiring', 'Expiring in 27 days (Advisory Dispatched)', 0, 'APH Table 1.4 Deposit for Management (MBA / PGDM)', 0, datetime('now')
+            'Expiring', 'Expiring in 27 days (Advisory Dispatched)', 0, 'APH Table 1.4 Deposit for Management (PG - MBA/PGDM)', 0, datetime('now')
         )
     ''')
 

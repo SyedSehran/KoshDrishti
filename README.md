@@ -155,5 +155,30 @@ API Health Check: `http://127.0.0.1:8000/api/v1/health`
 
 ---
 
+## 🔒 Security & Evaluator Configuration Notice
+
+### 1. Cryptographic Password Hashing
+All user authentication records in `users` are hashed using Python stdlib `hashlib.pbkdf2_hmac` with `SHA-256`, 100,000 iterations, and a unique per-user cryptographic salt (`hashlib.sha256(email.encode()).digest()`).
+
+### 2. Demo Evaluation JWT Secret (`DEMO_EVALUATION_FALLBACK`)
+> [!IMPORTANT]
+> **Evaluator Convenience Notice:** For offline evaluation and zero-setup local hackathon demonstrations, the backend defaults `JWT_SECRET` to a well-known local development string if the environment variable is not explicitly provided.
+> 
+> When running in this mode, `/api/v1/health` honestly reports:
+> ```json
+> "jwt_security_mode": "DEMO_EVALUATION_FALLBACK"
+> ```
+> This allows jury members and evaluators to test role switching (Bureau Officer, Approving Authority / Director, Institution, Bank Validator) immediately without configuring `.env` secrets.
+> 
+> **Production Deployment:**
+> In production or public environments, a high-entropy secret MUST be passed via the environment:
+> ```bash
+> export JWT_SECRET="your-high-entropy-cryptographic-secret-key-32-bytes"
+> python backend/server.py
+> ```
+> Do not expose or deploy the system to public networks without setting `JWT_SECRET`.
+
+---
+
 ## 🏛️ AICTE Regulation Bureau • Ministry of Education, Govt. of India
 Designed and developed for Smart India Hackathon (SIH) • Problem Statement ID 26265.

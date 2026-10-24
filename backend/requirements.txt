@@ -1,12 +1,6 @@
 # AICTE KoshDrishti (कोषदृष्टि) Backend Requirements
-# Lightweight, verified dependencies without heavy C-compilation hurdles
+# Lightweight, verified dependencies (Pure Python / stdlib based)
 
-# Core Authentication & PDF Processing (Native & Active)
+# Core Authentication & PDF Processing
 pyjwt>=2.8.0
 pypdf>=4.1.0
-
-# Optional FastAPI / Uvicorn Server
-fastapi>=0.110.0
-uvicorn>=0.28.0
-pydantic>=2.6.0
-python-multipart>=0.0.9
