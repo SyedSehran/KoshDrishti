@@ -14,6 +14,7 @@ import DirectorDeskView from './components/roles/DirectorDeskView';
 import { SEED_DATASET_200 } from './data/seedData';
 import { INITIAL_LEDGER_CHAIN } from './data/mockData';
 import { generateBlockHash } from './utils/cryptoLedger';
+import { Award, CheckCircle2 } from 'lucide-react';
 
 export default function App() {
   const [records, setRecords] = useState(SEED_DATASET_200);
