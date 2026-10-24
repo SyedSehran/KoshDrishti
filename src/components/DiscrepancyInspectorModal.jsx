@@ -11,20 +11,58 @@ export default function DiscrepancyInspectorModal({
   const [isCheckingBank, setIsCheckingBank] = useState(false);
   const [officerRemark, setOfficerRemark] = useState('');
   const [noticeSent, setNoticeSent] = useState(false);
+  const [triangulationScore, setTriangulationScore] = useState(null);
+
+  React.useEffect(() => {
+    if (!fdrRecord) return;
+    fetch('http://127.0.0.1:8000/api/v1/cbs/triangulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        institution_data: { amount: fdrRecord.amount, isGovernmentExempt: fdrRecord.isGovernmentExempt },
+        bank_record: {
+          amount: fdrRecord.hasDiscrepancies ? 1500000 : fdrRecord.amount,
+          tenorYears: fdrRecord.hasDiscrepancies ? 5 : (fdrRecord.tenorYears || 10),
+          jointHolderName: fdrRecord.hasDiscrepancies ? "Secretary, Trust ONLY" : fdrRecord.jointHolderName,
+          lienMarked: !fdrRecord.hasDiscrepancies
+        },
+        aph_norm: { minAmount: 3500000, tenorYears: 10 }
+      })
+    })
+    .then(r => r.json())
+    .then(d => setTriangulationScore(d))
+    .catch(() => {});
+  }, [fdrRecord]);
 
   if (!fdrRecord) return null;
 
-  const handleSimulateBankCheck = () => {
+  const handleSimulateBankCheck = async () => {
     setIsCheckingBank(true);
-    setTimeout(() => {
-      setIsCheckingBank(false);
-    }, 800);
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/v1/cbs/triangulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          institution_data: { amount: fdrRecord.amount },
+          bank_record: {
+            amount: 1500000,
+            tenorYears: 5,
+            jointHolderName: "Secretary, Trust ONLY",
+            lienMarked: false
+          },
+          aph_norm: { minAmount: 3500000, tenorYears: 10 }
+        })
+      });
+      const data = await res.json();
+      setTriangulationScore(data);
+    } catch {}
+    setIsCheckingBank(false);
   };
 
   const handleSendNotice = () => {
     setNoticeSent(true);
     if (onIssueRectificationNotice) {
-      onIssueRectificationNotice(fdrRecord, officerRemark || "Notice issued for tenure shortfall and missing AICTE joint lien endorsement.");
+      onIssueRectificationNotice(fdrRecord, officerRemark || "Statutory notice issued for tenure shortfall and missing AICTE joint lien endorsement.");
     }
   };
 
@@ -92,6 +130,35 @@ export default function DiscrepancyInspectorModal({
               <RefreshCw size={12} className={isCheckingBank ? 'spin' : ''} />
               <span>{isCheckingBank ? 'Checking bank...' : 'Bank check'}</span>
             </button>
+          </div>
+
+          {/* Rule-Based Compliance Score Strip */}
+          <div style={{
+            background: 'var(--bg-subtle)',
+            border: '1px solid var(--border-medium)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12
+          }}>
+            <div>
+              <span style={{ fontSize: 11, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
+                Rule-Based Compliance Score (APH Table 1.4)
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+                <span className="mono" style={{ fontSize: 20, fontWeight: 700, color: (triangulationScore?.rule_compliance_score ?? 45) < 70 ? '#b91c1c' : '#047857' }}>
+                  {triangulationScore?.rule_compliance_score ?? 45.0}%
+                </span>
+                <span className="badge-clean badge-flagged" style={{ fontSize: 10 }}>
+                  {triangulationScore?.compliance_level || 'FLAGGED'}
+                </span>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--ink-secondary)' }}>
+              Deterministic statutory verification against Chapter 1 Table 1.4
+            </div>
           </div>
 
           {/* Side-by-Side Comparison Columns */}

@@ -43,6 +43,20 @@ export default function App() {
     setTimeout(() => setToast(null), 3500);
   };
 
+  // Fetch real persisted instruments from SQLite DB on mount
+  React.useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/v1/instruments')
+      .then(r => r.json())
+      .then(data => {
+        if (data.instruments && data.instruments.length > 0) {
+          setRecords(data.instruments);
+        }
+      })
+      .catch(err => {
+        console.warn("Backend API not reachable, using local benchmark seed data:", err);
+      });
+  }, []);
+
   // Helper to append to cryptographic ledger
   const appendLedgerBlock = (action, actor, fdrId, details) => {
     const prevBlock = ledgerChain[ledgerChain.length - 1];
@@ -65,7 +79,8 @@ export default function App() {
   };
 
   // Handler for discrepancy resolution
-  const handleResolveDiscrepancy = (fdrId) => {
+  const handleResolveDiscrepancy = async (fdrId) => {
+    // 1. Update local UI
     setRecords(prev => prev.map(item => {
       if (item.id === fdrId) {
         return {
@@ -83,6 +98,21 @@ export default function App() {
       }
       return item;
     }));
+
+    // 2. Persist to real backend SQLite DB & append to Merkle ledger
+    try {
+      await fetch(`http://127.0.0.1:8000/api/v1/instruments/${fdrId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'Active',
+          legacyStatus: 'Lien confirmed in CBS',
+          actor: 'BANK_BRANCH_VALIDATION_DESK'
+        })
+      });
+    } catch (e) {
+      console.warn("Backend update error:", e);
+    }
 
     appendLedgerBlock(
       'DISCREPANCY_RECTIFIED',
@@ -106,7 +136,8 @@ export default function App() {
   };
 
   // Handler for two-officer approval
-  const handleApproveRelease = (fdrId, notes) => {
+  const handleApproveRelease = async (fdrId, notes) => {
+    // 1. Update local UI
     setRecords(prev => prev.map(item => {
       if (item.id === fdrId) {
         return {
@@ -125,6 +156,21 @@ export default function App() {
       }
       return item;
     }));
+
+    // 2. Persist to real backend SQLite DB
+    try {
+      await fetch(`http://127.0.0.1:8000/api/v1/instruments/${fdrId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'Released',
+          legacyStatus: 'Discharged (NOC issued post 10-Yr Lock-in)',
+          actor: 'MEMBER_SECRETARY_AICTE_DSC'
+        })
+      });
+    } catch (e) {
+      console.warn("Backend update error:", e);
+    }
 
     appendLedgerBlock(
       'TWO_OFFICER_RELEASE_SANCTIONED',

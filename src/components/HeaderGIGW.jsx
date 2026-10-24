@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, ChevronDown, User, Shield, HelpCircle, FileText, CheckCircle2, Bookmark, Award } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, ChevronDown, User, Shield, HelpCircle, FileText, CheckCircle2, Bookmark, Award, Bell, KeyRound, LogIn } from 'lucide-react';
 
 export default function HeaderGIGW({
   currentRole,
@@ -14,6 +14,43 @@ export default function HeaderGIGW({
   setTextSize
 }) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [alertsOpen, setAlertsOpen] = useState(false);
+  const [loginMenuOpen, setLoginMenuOpen] = useState(false);
+  const [alerts, setAlerts] = useState([]);
+  const [currentUser, setCurrentUser] = useState({
+    name: "Rajesh Sharma",
+    email: "officer@aicte.gov.in",
+    role: "bureau_officer",
+    department: "Regulation Bureau"
+  });
+
+  // Fetch real alerts from SQLite DB
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/v1/alerts')
+      .then(r => r.json())
+      .then(d => setAlerts(d.alerts || []))
+      .catch(() => {});
+  }, []);
+
+  // Login handler using backend PyJWT auth endpoint
+  const handleDemoLogin = async (email, password) => {
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem('kosh_jwt_token', data.token);
+        setCurrentUser(data.user);
+        setCurrentRole(data.user.role);
+        setLoginMenuOpen(false);
+      }
+    } catch (err) {
+      console.error("Login failed:", err);
+    }
+  };
 
   const roles = [
     { id: 'bureau_officer', name: 'Scrutiny Officer', labelHi: 'जांच अधिकारी' },
@@ -199,6 +236,128 @@ export default function HeaderGIGW({
             </select>
           </div>
 
+          {/* Real Alerts Notification Bell (Item 5) */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setAlertsOpen(!alertsOpen)}
+              className="btn btn-paper btn-sm"
+              style={{ height: 34, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 6 }}
+              title="Statutory alerts and expiry notices from DB"
+            >
+              <Bell size={14} color={alerts.length > 0 ? '#b91c1c' : 'var(--ink-secondary)'} />
+              {alerts.length > 0 && (
+                <span style={{
+                  background: '#ef4444',
+                  color: '#ffffff',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: '1px 5px',
+                  borderRadius: 8
+                }}>
+                  {alerts.length}
+                </span>
+              )}
+            </button>
+
+            {alertsOpen && (
+              <div style={{
+                position: 'absolute',
+                right: 0,
+                top: 40,
+                width: 320,
+                background: '#ffffff',
+                border: '1px solid var(--border-medium)',
+                borderRadius: 'var(--radius-sm)',
+                boxShadow: 'var(--shadow-modal)',
+                zIndex: 250,
+                padding: 10
+              }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-primary)', borderBottom: '1px solid var(--border-subtle)', paddingBottom: 6, marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Statutory Expiry Alarms</span>
+                  <span className="mono" style={{ fontSize: 10, color: 'var(--ink-muted)' }}>Real SQLite Alerts</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 240, overflowY: 'auto' }}>
+                  {alerts.map(a => (
+                    <div key={a.id} style={{
+                      padding: 8,
+                      background: a.daysRemaining <= 30 ? '#fef2f2' : 'var(--bg-subtle)',
+                      border: `1px solid ${a.daysRemaining <= 30 ? '#fca5a5' : 'var(--border-subtle)'}`,
+                      borderRadius: 4,
+                      fontSize: 11
+                    }}>
+                      <div style={{ fontWeight: 600, color: a.daysRemaining <= 30 ? '#b91c1c' : 'var(--ink-primary)' }}>
+                        {a.institutionName}
+                      </div>
+                      <div style={{ color: 'var(--ink-muted)', marginTop: 2 }}>{a.message}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* PyJWT Demo Login Dropdown (Item 6) */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setLoginMenuOpen(!loginMenuOpen)}
+              className="btn btn-paper btn-sm"
+              style={{ height: 34, border: '1px solid #10b981', color: '#047857', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}
+              title="Log in with real PyJWT token as any of the 4 roles"
+            >
+              <KeyRound size={13} />
+              <span>Demo Login</span>
+              <ChevronDown size={11} />
+            </button>
+
+            {loginMenuOpen && (
+              <div style={{
+                position: 'absolute',
+                right: 0,
+                top: 40,
+                width: 260,
+                background: '#ffffff',
+                border: '1px solid var(--border-medium)',
+                borderRadius: 'var(--radius-sm)',
+                boxShadow: 'var(--shadow-modal)',
+                zIndex: 250,
+                padding: 8
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-muted)', textTransform: 'uppercase', padding: '4px 6px', marginBottom: 4 }}>
+                  Select Authenticated Role (PyJWT)
+                </div>
+                {[
+                  { name: 'Scrutiny Officer', email: 'officer@aicte.gov.in', pw: 'Officer@123', role: 'bureau_officer' },
+                  { name: 'Approving Authority', email: 'director@aicte.gov.in', pw: 'Director@123', role: 'director' },
+                  { name: 'College Nodal Desk', email: 'college@kalinga.edu.in', pw: 'College@123', role: 'institution' },
+                  { name: 'Bank Branch Desk', email: 'validator@sbi.co.in', pw: 'Bank@123', role: 'bank_validator' }
+                ].map(u => (
+                  <button
+                    key={u.role}
+                    type="button"
+                    onClick={() => handleDemoLogin(u.email, u.pw)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      textAlign: 'left',
+                      background: currentUser.email === u.email ? 'var(--bg-muted)' : 'none',
+                      border: 'none',
+                      borderRadius: 4,
+                      cursor: 'pointer',
+                      fontSize: 12,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2,
+                      color: 'var(--ink-primary)'
+                    }}
+                  >
+                    <div style={{ fontWeight: 600 }}>{u.name}</div>
+                    <div className="mono" style={{ fontSize: 10, color: 'var(--ink-muted)' }}>{u.email}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Audit log #1408 button (Renamed from Block #1408) */}
           <button
             onClick={onOpenAuditLog}
@@ -217,7 +376,7 @@ export default function HeaderGIGW({
               style={{ height: 34, display: 'flex', alignItems: 'center', gap: 6 }}
             >
               <User size={13} />
-              <span>Officer Menu</span>
+              <span>{currentUser.name.split(' ')[0]} ({currentUser.role === 'director' ? 'Director' : currentUser.role === 'institution' ? 'College' : currentUser.role === 'bank_validator' ? 'Bank' : 'Officer'})</span>
               <ChevronDown size={11} />
             </button>
 

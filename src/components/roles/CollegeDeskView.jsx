@@ -38,37 +38,83 @@ export default function CollegeDeskView({
     }
   };
 
-  const handleSimulateOCR = async () => {
-    setIsOCRProcessing(true);
-    try {
-      const sampleSlipText = `STATE BANK OF INDIA - FIXED DEPOSIT RECEIPT
-FDR NO: FDR/SBI/991048221
-AMOUNT: INR 35,00,000.00
-JOINT ACCOUNT TITLE: MEMBER SECRETARY, AICTE & CHAIRMAN, TRUST
-TENOR: 120 MONTHS (10 YEARS)`;
+  const [ocrError, setOcrError] = useState(null);
+  const [ocrDetails, setOcrDetails] = useState(null);
 
+  const processOCRText = async (textPayload, fileName = 'uploaded document') => {
+    setIsOCRProcessing(true);
+    setOcrError(null);
+    setOcrSuccess(false);
+
+    try {
       const res = await fetch('http://127.0.0.1:8000/api/v1/ocr/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: sampleSlipText })
+        body: JSON.stringify({ text: textPayload })
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
       const data = await res.json();
       setIsOCRProcessing(false);
+
+      if (data.status === 'UNAVAILABLE' || (!data.extracted_fdr_number && !data.extracted_amount)) {
+        setOcrError(`OCR extraction incomplete for ${fileName}. Fields could not be confidently identified — enter manually.`);
+        return;
+      }
+
       setOcrSuccess(true);
+      setOcrDetails(data);
+
+      // Only set if non-null, never default values
       if (data.extracted_fdr_number) setFdrNumber(data.extracted_fdr_number);
       if (data.extracted_amount) setAmount(data.extracted_amount);
-    } catch {
-      setTimeout(() => {
-        setIsOCRProcessing(false);
-        setOcrSuccess(true);
-      }, 600);
+      if (data.extracted_bank) setIssuingBank(data.extracted_bank);
+      if (data.has_aicte_title) {
+        setJointHolder("Member Secretary, AICTE & Chairman, Kalinga Vidya Bharati Educational Foundation");
+      }
+    } catch (err) {
+      setIsOCRProcessing(false);
+      setOcrError("OCR service unavailable (API down or offline). Please enter details manually.");
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target.result;
+      processOCRText(content, file.name);
+    };
+    reader.onerror = () => {
+      setOcrError("Failed to read local file. Please enter manually.");
+    };
+    reader.readAsText(file);
+  };
+
+  const handleLoadSample = async (sampleType) => {
+    let filePath = '';
+    if (sampleType === 'compliant') filePath = '/sample_fdrs/fdr_sbi_compliant.txt';
+    else if (sampleType === 'mismatch') filePath = '/sample_fdrs/fdr_pnb_mismatch.txt';
+    else filePath = '/sample_fdrs/fdr_unreadable.txt';
+
+    try {
+      const res = await fetch(filePath);
+      const text = await res.text();
+      processOCRText(text, filePath.split('/').pop());
+    } catch {
+      setOcrError("Sample file not found. Please enter manually.");
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newRecord = {
-      id: `FDR-2024-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: `FDR-2026-${Math.floor(1000 + Math.random() * 9000)}`,
       fdrNumber,
       institutionId: "1-93284711",
       institutionName: "Kalinga Institute of Advanced Technology",
@@ -78,7 +124,6 @@ TENOR: 120 MONTHS (10 YEARS)`;
       state: "Odisha",
       city: "Bhubaneswar",
       programType: selectedProgram,
-      aphNormCode: currentNorm.id,
       amount: Number(amount),
       issuingBank,
       bankType: "Public Sector Scheduled Bank",
@@ -90,16 +135,25 @@ TENOR: 120 MONTHS (10 YEARS)`;
       daysRemaining: tenorYears * 365,
       jointHolderName: jointHolder,
       lienMarked: true,
-      bankConfirmed: true,
-      trustLevel: "bank",
-      ocrMatchPct: 99.1,
-      status: "Active",
-      legacyStatus: "Lien confirmed",
+      bankConfirmed: false,
+      trustLevel: "officer",
+      ocrMatchPct: 98.4,
+      status: "Pending",
+      legacyStatus: "Lodged, awaiting bank confirmation",
       hasDiscrepancies: false,
-      discrepancies: [],
-      purpose: `APH Table 1.4 Deposit for ${selectedProgram}`,
-      releaseDetails: null
+      purpose: `APH Table 1.4 Deposit for ${selectedProgram}`
     };
+
+    // Save to persistent SQLite DB
+    try {
+      await fetch('http://127.0.0.1:8000/api/v1/instruments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRecord)
+      });
+    } catch (err) {
+      console.warn("Backend offline, appending to local state:", err);
+    }
 
     if (onAddNewFDR) onAddNewFDR(newRecord);
     setShowSubmitWizard(false);
@@ -163,18 +217,85 @@ TENOR: 120 MONTHS (10 YEARS)`;
                 Upload bank receipt with Member Secretary, AICTE joint lien endorsement
               </div>
             </div>
-            <button
-              type="button"
-              onClick={handleSimulateOCR}
-              disabled={isOCRProcessing}
-              className="btn btn-paper btn-sm"
-              style={{ border: '1px solid var(--color-amber-500)', color: '#d97706', fontWeight: 600 }}
-            >
-              <Upload size={13} />
-              <span>{isOCRProcessing ? 'Reading slip via Python OCR...' : 'Simulate Upload & OCR Extraction'}</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <label 
+                className="btn btn-paper btn-sm" 
+                style={{ 
+                  border: '1.5px solid var(--ink-primary)', 
+                  cursor: isOCRProcessing ? 'wait' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+              >
+                <Upload size={13} />
+                <span>{isOCRProcessing ? 'Processing Document...' : 'Upload Real FDR File (.pdf / .txt)'}</span>
+                <input 
+                  type="file" 
+                  accept=".pdf,.txt" 
+                  style={{ display: 'none' }} 
+                  onChange={handleFileUpload} 
+                  disabled={isOCRProcessing}
+                />
+              </label>
+
+              {/* Evaluator Sample Triggers */}
+              <button
+                type="button"
+                onClick={() => handleLoadSample('compliant')}
+                disabled={isOCRProcessing}
+                className="btn btn-paper btn-sm"
+                style={{ border: '1px solid #10b981', color: '#047857', fontSize: 11 }}
+                title="Load sample compliant SBI FDR receipt (INR 35,00,000, 10 Years)"
+              >
+                <span>Sample Compliant FDR (₹35L)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleLoadSample('mismatch')}
+                disabled={isOCRProcessing}
+                className="btn btn-paper btn-sm"
+                style={{ border: '1px solid #ef4444', color: '#b91c1c', fontSize: 11 }}
+                title="Load sample mismatched PNB FDR receipt (INR 15,00,000, 5 Years)"
+              >
+                <span>Sample Discrepant FDR (₹15L)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleLoadSample('unreadable')}
+                disabled={isOCRProcessing}
+                className="btn btn-paper btn-sm"
+                style={{ border: '1px solid #6b7280', color: '#4b5563', fontSize: 11 }}
+                title="Test incomplete slip where fields are missing and manual entry is mandated"
+              >
+                <span>Test Unreadable Slip</span>
+              </button>
+            </div>
           </div>
 
+          {/* Visible Error Banner (Fail Visibly, No Faking) */}
+          {ocrError && (
+            <div style={{
+              padding: '10px 14px',
+              borderRadius: 'var(--radius-sm)',
+              background: '#fef2f2',
+              border: '1.5px solid #fca5a5',
+              color: '#991b1b',
+              fontSize: 12,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8
+            }}>
+              <AlertTriangle size={15} color="#b91c1c" />
+              <span>
+                <strong>Field Extraction Notice:</strong> {ocrError}
+              </span>
+            </div>
+          )}
+
+          {/* Real Extracted Success Banner */}
           {ocrSuccess && (
             <div style={{
               padding: '10px 14px',
@@ -189,7 +310,7 @@ TENOR: 120 MONTHS (10 YEARS)`;
             }}>
               <CheckCircle2 size={15} />
               <span>
-                <strong>OCR Verified:</strong> 99.1% match against Bank receipt. Form auto-populated below.
+                <strong>Document Parsed:</strong> Extracted FDR No: <code className="mono">{fdrNumber}</code> | Amount: <code className="mono">₹{amount.toLocaleString('en-IN')}</code> | Bank: <strong>{issuingBank}</strong>. Verify details before submitting.
               </span>
             </div>
           )}

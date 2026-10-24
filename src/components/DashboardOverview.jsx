@@ -349,7 +349,7 @@ export default function DashboardOverview({
                 <span className="badge badge-flagged">Lien Not Registered</span>
               </div>
               <p style={{ color: 'var(--text-secondary)', fontSize: 12, maxWidth: 750 }}>
-                <strong>Aryabhatta Institute of Applied Computing:</strong> The institution claimed an 8-year deposit with joint lien to AICTE, but the direct Punjab National Bank CBS API reports a 5-year deposit with <em>no joint lien endorsed</em>. AICTE Approval Process Handbook (APH) regulations violated.
+                <strong>[Simulated] Apex Institute of Applied Computing:</strong> The institution claimed an 8-year deposit with joint lien to AICTE, but the direct Punjab National Bank CBS API reports a 5-year deposit with <em>no joint lien endorsed</em>. AICTE Approval Process Handbook (APH) regulations violated.
               </p>
             </div>
           </div>
