@@ -41,11 +41,12 @@ export default function DocumentManager({ instrumentId, authToken, readOnly = fa
       const reader = new FileReader();
       reader.onload = async (ev) => {
         const base64 = ev.target.result.split(',')[1];
+        const token = authToken || localStorage.getItem('kosh_jwt_token') || '';
         const res = await fetch(`${API}/api/v1/documents`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
           },
           body: JSON.stringify({
             instrumentId,

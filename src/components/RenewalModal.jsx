@@ -38,11 +38,12 @@ export default function RenewalModal({ fdrRecord, authToken, onClose, onSuccess 
     setIsSubmitting(true);
     setStatus(null);
     try {
+      const token = authToken || localStorage.getItem('kosh_jwt_token') || '';
       const res = await fetch(`${API}/api/v1/instruments/${fdrRecord.id}/renew`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           renewalType,

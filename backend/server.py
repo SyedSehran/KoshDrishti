@@ -657,7 +657,7 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
         elif path == "/api/v1/alerts":
             conn = get_db()
             c = conn.cursor()
-            c.execute("SELECT id, fdr_id, institution_name, alert_type, days_remaining, message, status, created_at FROM alerts ORDER BY id DESC")
+            c.execute("SELECT id, fdr_id, institution_name, alert_type, days_remaining, message, status, created_at FROM alerts WHERE status NOT IN ('DISMISSED', 'RESOLVED') ORDER BY id DESC")
             rows = c.fetchall()
             conn.close()
             alerts = [{
@@ -1031,6 +1031,27 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             run_alert_scanner()
             self._set_headers(200)
             self.wfile.write(json.dumps({"success": True, "message": "Alert scan executed successfully"}).encode('utf-8'))
+
+        # 6b. Dismiss All Alerts
+        elif path == "/api/v1/alerts/dismiss-all":
+            conn = get_db()
+            c = conn.cursor()
+            c.execute("UPDATE alerts SET status = 'DISMISSED' WHERE status NOT IN ('DISMISSED', 'RESOLVED')")
+            conn.commit()
+            conn.close()
+            self._set_headers(200)
+            self.wfile.write(json.dumps({"success": True, "message": "All alerts dismissed"}).encode('utf-8'))
+
+        # 6c. Dismiss Single Alert by ID
+        elif re.match(r'^/api/v1/alerts/([0-9]+)/dismiss$', path):
+            alert_id = int(re.match(r'^/api/v1/alerts/([0-9]+)/dismiss$', path).group(1))
+            conn = get_db()
+            c = conn.cursor()
+            c.execute("UPDATE alerts SET status = 'DISMISSED' WHERE id = ?", (alert_id,))
+            conn.commit()
+            conn.close()
+            self._set_headers(200)
+            self.wfile.write(json.dumps({"success": True, "id": alert_id, "status": "DISMISSED"}).encode('utf-8'))
 
         # 7. Auth Login (Cryptographic PBKDF2-HMAC per-user salt)
         elif path == "/api/v1/auth/login":

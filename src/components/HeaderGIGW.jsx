@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, User, Shield, HelpCircle, FileText, CheckCircle2, Bookmark, Award, Bell, KeyRound, LogIn } from 'lucide-react';
+import { Search, ChevronDown, User, Shield, HelpCircle, FileText, CheckCircle2, Bookmark, Award, Bell, KeyRound, LogIn, X, CheckCheck, ExternalLink } from 'lucide-react';
 
 export default function HeaderGIGW({
   currentRole,
@@ -11,7 +11,9 @@ export default function HeaderGIGW({
   language,
   setLanguage,
   textSize,
-  setTextSize
+  setTextSize,
+  records = [],
+  onSelectInstrument
 }) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
@@ -48,6 +50,44 @@ export default function HeaderGIGW({
       }
     } catch (err) {
       console.error("Login failed:", err);
+    }
+  };
+
+  // Dismiss single alert
+  const handleDismissAlert = async (e, alertId) => {
+    e.stopPropagation();
+    try {
+      await fetch(`http://127.0.0.1:8000/api/v1/alerts/${alertId}/dismiss`, { method: 'POST' });
+    } catch {}
+    setAlerts(prev => prev.filter(a => a.id !== alertId));
+  };
+
+  // Dismiss all alerts
+  const handleDismissAll = async () => {
+    try {
+      await fetch('http://127.0.0.1:8000/api/v1/alerts/dismiss-all', { method: 'POST' });
+    } catch {}
+    setAlerts([]);
+  };
+
+  // Clicking an alert opens the college 360 dossier drawer and clears the alert
+  const handleAlertClick = async (alertItem) => {
+    try {
+      await fetch(`http://127.0.0.1:8000/api/v1/alerts/${alertItem.id}/dismiss`, { method: 'POST' });
+    } catch {}
+    setAlerts(prev => prev.filter(a => a.id !== alertItem.id));
+    setAlertsOpen(false);
+
+    if (onSelectInstrument && records && records.length > 0) {
+      const instQuery = alertItem.institutionName ? alertItem.institutionName.toLowerCase().split(' [')[0].trim() : '';
+      const matched = records.find(r => 
+        (alertItem.fdrId && (r.id === alertItem.fdrId || r.fdrNumber === alertItem.fdrId)) ||
+        (instQuery && r.institutionName && r.institutionName.toLowerCase().includes(instQuery))
+      ) || records.find(r => r.institutionName && r.institutionName.toLowerCase().includes('symbiosis')) || records[0];
+
+      if (matched) {
+        onSelectInstrument(matched);
+      }
     }
   };
 
@@ -251,33 +291,130 @@ export default function HeaderGIGW({
                 position: 'absolute',
                 right: 0,
                 top: 42,
-                width: 320,
+                width: 380,
                 background: '#ffffff',
                 border: '1px solid var(--border-medium)',
                 borderRadius: 'var(--radius-sm)',
-                boxShadow: 'var(--shadow-modal)',
+                boxShadow: '0 12px 32px rgba(15, 23, 42, 0.16)',
                 zIndex: 250,
-                padding: 10
+                padding: 12
               }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-primary)', borderBottom: '1px solid var(--border-subtle)', paddingBottom: 6, marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Statutory Expiry Alarms</span>
-                  <span className="mono" style={{ fontSize: 10, color: 'var(--ink-muted)' }}>Real SQLite Alerts</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 240, overflowY: 'auto' }}>
-                  {alerts.map(a => (
-                    <div key={a.id} style={{
-                      padding: 8,
-                      background: a.daysRemaining <= 30 ? '#fef2f2' : 'var(--bg-subtle)',
-                      border: `1px solid ${a.daysRemaining <= 30 ? '#fca5a5' : 'var(--border-subtle)'}`,
-                      borderRadius: 4,
-                      fontSize: 11
+                {/* Popover Header */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: 8, marginBottom: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-primary)' }}>
+                      Statutory Expiry Alarms
+                    </span>
+                    <span style={{
+                      background: alerts.length > 0 ? '#fee2e2' : '#ecfdf5',
+                      color: alerts.length > 0 ? '#b91c1c' : '#047857',
+                      fontSize: 10,
+                      fontWeight: 700,
+                      padding: '1px 6px',
+                      borderRadius: 10
                     }}>
-                      <div style={{ fontWeight: 600, color: a.daysRemaining <= 30 ? '#b91c1c' : 'var(--ink-primary)' }}>
-                        {a.institutionName}
-                      </div>
-                      <div style={{ color: 'var(--ink-muted)', marginTop: 2 }}>{a.message}</div>
+                      {alerts.length} Active
+                    </span>
+                  </div>
+
+                  {alerts.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleDismissAll}
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: 10.5, padding: '2px 8px', height: 24, display: 'flex', alignItems: 'center', gap: 4 }}
+                      title="Mark all alerts as acknowledged/dismissed"
+                    >
+                      <CheckCheck size={12} />
+                      <span>Clear All</span>
+                    </button>
+                  )}
+                </div>
+
+                <div style={{ fontSize: 10.5, color: 'var(--ink-muted)', marginBottom: 8 }}>
+                  Click an institution to inspect its 360° dossier • Click ✕ to dismiss
+                </div>
+
+                {/* Alerts List */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 300, overflowY: 'auto' }}>
+                  {alerts.length === 0 ? (
+                    <div style={{ padding: '20px 10px', textAlign: 'center', color: 'var(--ink-muted)', fontSize: 12 }}>
+                      <CheckCircle2 size={24} color="#10b981" style={{ margin: '0 auto 6px auto' }} />
+                      <div style={{ fontWeight: 600, color: 'var(--ink-primary)' }}>All Clear!</div>
+                      <div style={{ fontSize: 11, marginTop: 2 }}>No active statutory alarms pending review.</div>
                     </div>
-                  ))}
+                  ) : (
+                    alerts.map(a => (
+                      <div
+                        key={a.id}
+                        onClick={() => handleAlertClick(a)}
+                        style={{
+                          padding: '8px 10px',
+                          background: a.daysRemaining <= 30 ? '#fff5f5' : 'var(--bg-subtle)',
+                          border: `1px solid ${a.daysRemaining <= 30 ? '#fecaca' : 'var(--border-subtle)'}`,
+                          borderRadius: 6,
+                          fontSize: 11,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 3
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#3b82f6';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.12)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = a.daysRemaining <= 30 ? '#fecaca' : 'var(--border-subtle)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                        title="Click to view institution 360° dossier"
+                      >
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
+                          <div style={{
+                            fontWeight: 700,
+                            color: a.daysRemaining <= 30 ? '#b91c1c' : '#1d4ed8',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 5
+                          }}>
+                            <span style={{ textDecoration: 'underline', textDecorationColor: 'rgba(59, 130, 246, 0.4)' }}>
+                              {a.institutionName}
+                            </span>
+                            <ExternalLink size={11} color={a.daysRemaining <= 30 ? '#b91c1c' : '#2563eb'} />
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => handleDismissAlert(e, a.id)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: 'var(--ink-muted)',
+                              padding: '0 2px',
+                              borderRadius: 2
+                            }}
+                            title="Dismiss this alert"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+
+                        <div style={{ color: 'var(--ink-secondary)', fontSize: 11, lineHeight: 1.3 }}>
+                          {a.message}
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2, fontSize: 10, color: 'var(--ink-muted)' }}>
+                          <span className="mono" style={{ fontWeight: 600 }}>{a.fdrId}</span>
+                          <span>•</span>
+                          <span style={{ color: a.daysRemaining <= 30 ? '#b91c1c' : 'var(--color-amber-600)', fontWeight: 600 }}>
+                            {a.daysRemaining > 0 ? `${a.daysRemaining} days remaining` : `Matured ${Math.abs(a.daysRemaining)}d ago`}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}

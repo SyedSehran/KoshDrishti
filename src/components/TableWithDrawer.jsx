@@ -23,12 +23,12 @@ export default function TableWithDrawer({
     // Search query
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = !q ||
-      item.fdrNumber.toLowerCase().includes(q) ||
-      item.institutionName.toLowerCase().includes(q) ||
-      item.institutionId.toLowerCase().includes(q) ||
-      item.issuingBank.toLowerCase().includes(q) ||
-      item.city.toLowerCase().includes(q) ||
-      item.state.toLowerCase().includes(q);
+      item.fdrNumber?.toLowerCase().includes(q) ||
+      item.institutionName?.toLowerCase().includes(q) ||
+      item.institutionId?.toLowerCase().includes(q) ||
+      item.issuingBank?.toLowerCase().includes(q) ||
+      item.city?.toLowerCase().includes(q) ||
+      item.state?.toLowerCase().includes(q);
 
     // Status filter
     let matchesStatus = true;

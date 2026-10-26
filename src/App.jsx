@@ -108,9 +108,13 @@ export default function App() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          status: 'Active',
+          status: currentRole === 'bank_validator' ? undefined : 'Active',
+          bankConfirmed: true,
+          lienMarked: true,
+          hasDiscrepancies: currentRole === 'bank_validator' ? undefined : false,
+          resolutionNote: 'Statutory verification complete: CBS lien endorsed and APH Table 1.4 compliance confirmed.',
           legacyStatus: 'Lien confirmed in CBS',
-          actor: 'BANK_BRANCH_VALIDATION_DESK'
+          actor: currentRole === 'bank_validator' ? 'BANK_BRANCH_VALIDATION_DESK' : 'REGULATION_BUREAU'
         })
       });
     } catch (e) {
@@ -222,6 +226,8 @@ export default function App() {
         setCurrentRole={setCurrentRole}
         onOpenAuditLog={() => setIsLedgerOpen(true)}
         onOpenDemoTours={() => setIsDemoScriptsOpen(true)}
+        onSelectInstrument={(item) => setActiveDrawerInstrument(item)}
+        records={records}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         language={language}
@@ -328,6 +334,7 @@ export default function App() {
           onOpenCompareSources={(item) => setInspectingDiscrepancyFDR(item)}
           onOpenTwoOfficerApproval={(item) => setReleasingFDR(item)}
           onOpenAuditLog={() => setIsLedgerOpen(true)}
+          authToken={localStorage.getItem('kosh_jwt_token') || ''}
         />
       )}
 

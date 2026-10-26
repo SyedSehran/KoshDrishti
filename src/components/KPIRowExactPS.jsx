@@ -77,7 +77,7 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
     },
     {
       id: 'Release',
-      label: 'Released / NOC',
+      label: 'Released (NOC)',
       count: releasedCount,
       icon: FileCheck2,
       accentGrad: 'linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%)',
@@ -97,7 +97,7 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
       iconColor: '#ea580c',
       cardBg: 'linear-gradient(180deg, #ffffff 0%, #fff7ed 100%)',
       borderColor: '#fed7aa',
-      desc: 'Deposit requested / review'
+      desc: 'Under Bureau Scrutiny'
     },
     {
       id: 'Discrepancy',
@@ -109,7 +109,7 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
       iconColor: '#e11d48',
       cardBg: 'linear-gradient(180deg, #ffffff 0%, #fff1f2 100%)',
       borderColor: '#fecdd3',
-      desc: 'Action required'
+      desc: 'Lien / Term Shortfall'
     }
   ];
 
@@ -165,10 +165,10 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
         </div>
       </div>
 
-      {/* Colorful 7 KPI Tiles - Fixed Single Row with Roomy, Uncompacted Dimensions */}
+      {/* Colorful 7 KPI Tiles - Roomy, Uncompacted Responsive Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
         gap: 14,
         width: '100%'
       }}>
@@ -184,14 +184,14 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
                 background: isSelected ? 'var(--bg-muted)' : tile.cardBg,
                 border: isSelected ? '2px solid var(--ink-primary)' : `1px solid ${tile.borderColor}`,
                 borderRadius: 'var(--radius-md)',
-                padding: '18px 18px',
+                padding: '16px 18px',
                 textAlign: 'left',
                 cursor: 'pointer',
                 transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 10,
-                minHeight: 136,
+                minHeight: 130,
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: isSelected ? '0 4px 14px rgba(0,0,0,0.1)' : 'var(--shadow-sm)'
@@ -222,21 +222,18 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
               {/* Title & Icon */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 6 }}>
                 <span style={{
-                  fontSize: 12.5,
+                  fontSize: 12,
                   fontWeight: 700,
                   color: tile.iconColor,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }} title={tile.label}>
+                  letterSpacing: '0.03em'
+                }}>
                   {tile.label}
                 </span>
 
                 <div style={{
-                  width: 32,
-                  height: 32,
+                  width: 30,
+                  height: 30,
                   borderRadius: '50%',
                   background: tile.iconBg,
                   display: 'flex',
@@ -245,24 +242,22 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
                   color: tile.iconColor,
                   flexShrink: 0
                 }}>
-                  <Icon size={17} />
+                  <Icon size={16} />
                 </div>
               </div>
 
               {/* Number Count */}
-              <div className="mono" style={{ fontSize: 32, fontWeight: 800, color: 'var(--ink-primary)', lineHeight: 1, margin: '2px 0' }}>
+              <div className="mono" style={{ fontSize: 30, fontWeight: 800, color: 'var(--ink-primary)', lineHeight: 1, margin: '2px 0' }}>
                 {tile.count}
               </div>
 
               {/* Description */}
               <div style={{
-                fontSize: 12,
+                fontSize: 11.5,
                 color: 'var(--ink-secondary)',
                 lineHeight: 1.35,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }} title={tile.desc}>
+                marginTop: 'auto'
+              }}>
                 {tile.desc}
               </div>
             </button>
