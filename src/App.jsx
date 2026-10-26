@@ -359,6 +359,17 @@ export default function App() {
         <CryptoLedgerModal
           ledgerChain={ledgerChain}
           onClose={() => setIsLedgerOpen(false)}
+          onSelectInstrument={(fdrIdOrItem) => {
+            setIsLedgerOpen(false);
+            if (typeof fdrIdOrItem === 'string') {
+              const found = records.find(r => r.id === fdrIdOrItem || r.fdrNumber === fdrIdOrItem);
+              if (found) {
+                setActiveDrawerInstrument(found);
+              }
+            } else if (fdrIdOrItem) {
+              setActiveDrawerInstrument(fdrIdOrItem);
+            }
+          }}
         />
       )}
 
