@@ -71,7 +71,7 @@ class TestAuditFixes(unittest.TestCase):
         self.assertTrue(server.check_institution_ownership(director_auth, "College of Engineering, Guindy"))
 
     def test_p1_renewal_business_rules(self):
-        """Verify renewal business rules reject non-numeric, below-norm, and Discrepancy/Released FDRs"""
+        """Verify renewal business rules reject non-numeric, below-norm, non-10 tenor, and leased multiplier"""
         prog_norm = server.get_server_aph_norm("Engineering & Technology (UG)")
         self.assertIsNotNone(prog_norm)
         self.assertEqual(prog_norm["minAmount"], 3500000)
@@ -80,6 +80,93 @@ class TestAuditFixes(unittest.TestCase):
         # Unknown program returns None
         unknown_norm = server.get_server_aph_norm("Pharmacy")
         self.assertIsNone(unknown_norm)
+
+        # Leased building multiplier is 2x
+        base_norm = prog_norm["minAmount"]
+        leased_norm = base_norm * 2
+        self.assertEqual(leased_norm, 7000000)
+
+    def test_p1_concurrent_ledger_appends_no_race(self):
+        """Verify concurrent threads appending to ledger never crash with UNIQUE constraint failed"""
+        import threading
+        errors = []
+
+        def worker(thread_id):
+            try:
+                server.append_to_ledger("CONCURRENT_TEST", f"WORKER_{thread_id}", f"FDR-RACE-{thread_id}", f"Stress test thread {thread_id}")
+            except Exception as e:
+                errors.append(f"Thread {thread_id} crashed: {e}")
+
+        threads = [threading.Thread(target=worker, args=(i,)) for i in range(25)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        self.assertEqual(len(errors), 0, f"Concurrent ledger writes crashed: {errors}")
+
+        # Verify cryptographic chain integrity after concurrent writes
+        res = server.verify_ledger_chain()
+        self.assertTrue(res.get("valid"), f"Ledger corrupted after concurrent writes: {res}")
+
+    def test_p1_renewal_http_endpoint_rejects_sub_norm(self):
+        """Verify that renewal HTTP endpoint strictly rejects amount=1 or tenor=1 or leased shortfall with 400"""
+        import urllib.request
+        import urllib.error
+        import json
+
+        kalinga_token = jwt.encode({
+            "sub": "3",
+            "email": "college@kalinga.edu.in",
+            "name": "Dr. S. Mohanty",
+            "role": "institution",
+            "department": "Kalinga Institute Desk",
+            "exp": datetime.utcnow() + timedelta(hours=24)
+        }, server.JWT_SECRET, algorithm=server.JWT_ALGORITHM)
+
+        url = "http://127.0.0.1:8000/api/v1/instruments/FDR-2024-1001/renew"
+
+        # Case 1: amount=1, tenor=1
+        payload = json.dumps({"amount": 1, "tenorYears": 1}).encode('utf-8')
+        req = urllib.request.Request(url, data=payload, headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {kalinga_token}"
+        })
+        try:
+            urllib.request.urlopen(req)
+            self.fail("Renewal with amount=1 and tenor=1 should have returned 400 Bad Request!")
+        except urllib.error.HTTPError as e:
+            self.assertEqual(e.code, 400)
+            err_data = json.loads(e.read().decode())
+            self.assertIn("below Table 1.4 mandatory norm", err_data.get("error", ""))
+
+        # Case 2: amount=3,500,000, tenor=1 (tenor != 10)
+        payload = json.dumps({"amount": 3500000, "tenorYears": 1}).encode('utf-8')
+        req = urllib.request.Request(url, data=payload, headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {kalinga_token}"
+        })
+        try:
+            urllib.request.urlopen(req)
+            self.fail("Renewal with tenor=1 should have returned 400 Bad Request!")
+        except urllib.error.HTTPError as e:
+            self.assertEqual(e.code, 400)
+            err_data = json.loads(e.read().decode())
+            self.assertIn("tenor must be exactly 10 years", err_data.get("error", ""))
+
+        # Case 3: amount=3,500,000, tenor=10, isLeasedBuilding=True (norm is 2x = 7,000,000)
+        payload = json.dumps({"amount": 3500000, "tenorYears": 10, "isLeasedBuilding": True}).encode('utf-8')
+        req = urllib.request.Request(url, data=payload, headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {kalinga_token}"
+        })
+        try:
+            urllib.request.urlopen(req)
+            self.fail("Renewal with leased building at 35L should have returned 400 Bad Request!")
+        except urllib.error.HTTPError as e:
+            self.assertEqual(e.code, 400)
+            err_data = json.loads(e.read().decode())
+            self.assertIn("2× leased premises multiplier", err_data.get("error", ""))
 
     def test_p1_alert_scanner_includes_expiring(self):
         """Verify alert scanner runs without throwing and handles expiring instruments"""

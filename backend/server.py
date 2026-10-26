@@ -188,46 +188,62 @@ def get_server_aph_norm(program):
         
     return None
 
-# Helper: Append to Cryptographic SHA-256 Hash-Chained Ledger
-def append_to_ledger(action, actor, fdr_id, details):
-    with db_session() as conn:
-        with conn:
-            c = conn.cursor()
-            c.execute("SELECT block_index, block_hash FROM audit_ledger ORDER BY block_index DESC LIMIT 1")
-            last_block = c.fetchone()
-            
-            if last_block:
-                new_index = last_block["block_index"] + 1
-                prev_hash = last_block["block_hash"]
-            else:
-                new_index = 0
-                prev_hash = "0" * 64
+# Global lock to eliminate concurrency race conditions on audit_ledger block_index
+LEDGER_LOCK = threading.Lock()
 
-            timestamp = datetime.utcnow().isoformat() + "Z"
-            block_string = f"{new_index}:{prev_hash}:{timestamp}:{action}:{actor}:{fdr_id}:{details}"
-            block_hash = hashlib.sha256(block_string.encode('utf-8')).hexdigest()
+def _append_to_ledger_unlocked(c, action, actor, fdr_id, details):
+    c.execute("SELECT block_index, block_hash FROM audit_ledger ORDER BY block_index DESC LIMIT 1")
+    last_block = c.fetchone()
+    
+    if last_block:
+        new_index = last_block["block_index"] + 1
+        prev_hash = last_block["block_hash"]
+    else:
+        new_index = 0
+        prev_hash = "0" * 64
 
-            c.execute('''
-                INSERT INTO audit_ledger (block_index, timestamp, action, actor, fdr_id, previous_hash, block_hash, details)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (new_index, timestamp, action, actor, fdr_id, prev_hash, block_hash, details))
+    timestamp = datetime.utcnow().isoformat() + "Z"
+    block_string = f"{new_index}:{prev_hash}:{timestamp}:{action}:{actor}:{fdr_id}:{details}"
+    block_hash = hashlib.sha256(block_string.encode('utf-8')).hexdigest()
 
-            # Maintain separate ledger checkpoint table to detect tail truncation
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS ledger_checkpoint (
-                    id INTEGER PRIMARY KEY,
-                    last_block_index INTEGER NOT NULL,
-                    head_hash TEXT NOT NULL,
-                    total_blocks INTEGER NOT NULL,
-                    updated_at TEXT NOT NULL
-                )
-            ''')
-            c.execute('''
-                INSERT OR REPLACE INTO ledger_checkpoint (id, last_block_index, head_hash, total_blocks, updated_at)
-                VALUES (1, ?, ?, ?, ?)
-            ''', (new_index, block_hash, new_index + 1, timestamp))
+    c.execute('''
+        INSERT INTO audit_ledger (block_index, timestamp, action, actor, fdr_id, previous_hash, block_hash, details)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (new_index, timestamp, action, actor, fdr_id, prev_hash, block_hash, details))
+
+    # Maintain separate ledger checkpoint table to detect tail truncation
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS ledger_checkpoint (
+            id INTEGER PRIMARY KEY,
+            last_block_index INTEGER NOT NULL,
+            head_hash TEXT NOT NULL,
+            total_blocks INTEGER NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+    ''')
+    c.execute('''
+        INSERT OR REPLACE INTO ledger_checkpoint (id, last_block_index, head_hash, total_blocks, updated_at)
+        VALUES (1, ?, ?, ?, ?)
+    ''', (new_index, block_hash, new_index + 1, timestamp))
 
     return {"blockIndex": new_index, "blockHash": block_hash, "previousHash": prev_hash}
+
+# Helper: Append to Cryptographic SHA-256 Hash-Chained Ledger
+def append_to_ledger(action, actor, fdr_id, details, conn=None):
+    """
+    Appends an entry to the SHA-256 hash-chained audit ledger.
+    If conn is provided, executes within the caller's active database transaction.
+    Uses LEDGER_LOCK to prevent concurrency race conditions on block_index.
+    """
+    with LEDGER_LOCK:
+        if conn is not None:
+            c = conn.cursor()
+            return _append_to_ledger_unlocked(c, action, actor, fdr_id, details)
+        else:
+            with db_session() as new_conn:
+                with new_conn:
+                    c = new_conn.cursor()
+                    return _append_to_ledger_unlocked(c, action, actor, fdr_id, details)
 
 # Helper: Verify Cryptographic Chain Integrity
 def verify_ledger_chain():
@@ -1086,6 +1102,9 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                     return
 
             prog = payload.get("programType", "Engineering & Technology (UG)")
+            aph_norm = get_server_aph_norm(prog)
+            is_govt = bool(aph_norm and aph_norm.get("isGovt"))
+
             try:
                 raw_amt = payload.get("amount", 3500000)
                 amount = float(str(raw_amt).replace(",", "").strip())
@@ -1096,7 +1115,6 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": "Invalid deposit amount: must be a positive number"}).encode('utf-8'))
                 return
 
-            bank = payload.get("issuingBank", "State Bank of India")
             try:
                 tenor = int(payload.get("tenorYears", 10))
                 if tenor <= 0:
@@ -1106,6 +1124,41 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": "Invalid tenor: must be a positive integer"}).encode('utf-8'))
                 return
 
+            # Statutory Table 1.4 check for new instruments
+            if not is_govt:
+                if not aph_norm:
+                    self._set_headers(400)
+                    self.wfile.write(json.dumps({
+                        "error": f"Statutory Block: Program '{prog}' is not recognized under AICTE APH Table 1.4.",
+                        "code": "PROGRAM_NOT_IN_TABLE_1_4"
+                    }).encode('utf-8'))
+                    return
+
+                is_leased = bool(payload.get("isLeasedBuilding", False) or payload.get("is_leased_building", False) or payload.get("isLeased", False))
+                min_required = aph_norm["minAmount"] * 2 if is_leased else aph_norm["minAmount"]
+
+                if amount < min_required:
+                    multiplier_note = " (includes 2× leased premises multiplier)" if is_leased else ""
+                    self._set_headers(400)
+                    self.wfile.write(json.dumps({
+                        "error": f"Statutory Violation: Deposit amount of ₹{amount:,.0f} is below Table 1.4 mandatory norm of ₹{min_required:,.0f}{multiplier_note} for {prog}.",
+                        "code": "AMOUNT_BELOW_NORM",
+                        "min_required": min_required,
+                        "provided": amount
+                    }).encode('utf-8'))
+                    return
+
+                if tenor != 10:
+                    self._set_headers(400)
+                    self.wfile.write(json.dumps({
+                        "error": f"Statutory Violation: Mandatory deposit tenor must be exactly 10 years per APH Clause 11.8 (received {tenor}).",
+                        "code": "TENOR_NOT_10_YEARS",
+                        "requiredTenor": 10,
+                        "providedTenor": tenor
+                    }).encode('utf-8'))
+                    return
+
+            bank = payload.get("issuingBank", "State Bank of India")
             joint = payload.get("jointHolderName", "Member Secretary, AICTE & Chairman, Trust")
             
             # Collision-free UUID for primary key
@@ -1114,7 +1167,9 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             fdr_no = payload.get("fdrNumber") or f"FDR/NEW/{unique_suffix}"
             issue_d = datetime.now().strftime("%Y-%m-%d")
             maturity_d = (datetime.now() + timedelta(days=365 * tenor)).strftime("%Y-%m-%d")
+            actor_name = auth.get("name", "AUTHENTICATED_USER")
 
+            # Single atomic transaction for instrument + ledger + checkpoint
             with db_session() as conn:
                 with conn:
                     c = conn.cursor()
@@ -1135,11 +1190,9 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                         payload.get("accountNumber", "40199999999"), issue_d, maturity_d, tenor,
                         tenor * 365, joint, 1, 0, "officer", payload.get("ocrMatchPct", 98.5),
                         "Pending", "Lien filed, awaiting bank verification", 0,
-                        f"APH Table 1.4 Security Deposit for {prog}", 0
+                        f"APH Table 1.4 Security Deposit for {prog}", 1 if is_govt else 0
                     ))
-
-            actor_name = auth.get("name", "AUTHENTICATED_USER")
-            append_to_ledger("INSTRUMENT_LODGED", actor_name, new_id, f"FDR {fdr_no} for ₹{amount:,.0f} registered by {inst_name}")
+                    append_to_ledger("INSTRUMENT_LODGED", actor_name, new_id, f"FDR {fdr_no} for ₹{amount:,.0f} registered by {inst_name}", conn=conn)
 
             self._set_headers(201)
             self.wfile.write(json.dumps({"success": True, "id": new_id, "fdrNumber": fdr_no}).encode('utf-8'))
@@ -1336,8 +1389,8 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                         (instrument_id, filename, content_type_file, file_bytes, len(file_bytes), uploader, datetime.utcnow().isoformat() + "Z")
                     )
                     doc_id = c.lastrowid
+                    append_to_ledger("DOCUMENT_STORED", uploader, instrument_id or "GENERAL", f"Document '{filename}' ({len(file_bytes)} bytes) stored for instrument {instrument_id}", conn=conn)
 
-            append_to_ledger("DOCUMENT_STORED", uploader, instrument_id or "GENERAL", f"Document '{filename}' ({len(file_bytes)} bytes) stored for instrument {instrument_id}")
             self._set_headers(201)
             self.wfile.write(json.dumps({"success": True, "documentId": doc_id, "filename": filename, "fileSize": len(file_bytes)}).encode('utf-8'))
 
@@ -1409,25 +1462,39 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             # Business Rule 4: Table 1.4 statutory minimum amount and tenor check
             prog = payload.get("programType") or original["program_type"]
             aph_norm = get_server_aph_norm(prog)
-            if aph_norm and not aph_norm.get("isGovt"):
-                min_required = aph_norm.get("minAmount", 0)
-                min_tenor = aph_norm.get("tenorYears", 10)
-                if new_amount < min_required:
+            is_govt = bool(original["is_govt"] or (aph_norm and aph_norm.get("isGovt")))
+
+            if not is_govt:
+                if not aph_norm:
                     self._set_headers(400)
                     self.wfile.write(json.dumps({
-                        "error": f"Statutory Violation: Renewal amount of ₹{new_amount:,.0f} is below Table 1.4 mandatory norm of ₹{min_required:,.0f} for {prog}.",
-                        "code": "RENEWAL_AMOUNT_BELOW_NORM",
-                        "min_required": min_required,
-                        "provided": new_amount
+                        "error": f"Statutory Block: Program '{prog}' is not recognized under AICTE APH Table 1.4 norms.",
+                        "code": "PROGRAM_NOT_IN_TABLE_1_4"
                     }).encode('utf-8'))
                     return
-                if new_tenor < min_tenor:
+
+                is_leased = bool(payload.get("isLeasedBuilding", False) or payload.get("is_leased_building", False) or payload.get("isLeased", False))
+                min_required = aph_norm["minAmount"] * 2 if is_leased else aph_norm["minAmount"]
+
+                if new_amount < min_required:
+                    multiplier_note = " (includes 2× leased premises multiplier)" if is_leased else ""
                     self._set_headers(400)
                     self.wfile.write(json.dumps({
-                        "error": f"Statutory Violation: Renewal tenor of {new_tenor} years is below mandatory {min_tenor}-year lock-in (APH Cl. 11.8).",
-                        "code": "RENEWAL_TENOR_BELOW_NORM",
-                        "min_tenor": min_tenor,
-                        "provided": new_tenor
+                        "error": f"Statutory Violation: Renewal amount of ₹{new_amount:,.0f} is below Table 1.4 mandatory norm of ₹{min_required:,.0f}{multiplier_note} for {prog}.",
+                        "code": "RENEWAL_AMOUNT_BELOW_NORM",
+                        "min_required": min_required,
+                        "provided": new_amount,
+                        "is_leased": is_leased
+                    }).encode('utf-8'))
+                    return
+
+                if new_tenor != 10:
+                    self._set_headers(400)
+                    self.wfile.write(json.dumps({
+                        "error": f"Statutory Violation: Renewal tenor must be exactly 10 years per APH Clause 11.8 statutory lock-in requirements (received {new_tenor}).",
+                        "code": "RENEWAL_TENOR_NOT_10_YEARS",
+                        "requiredTenor": 10,
+                        "providedTenor": new_tenor
                     }).encode('utf-8'))
                     return
 
@@ -1443,6 +1510,7 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             maturity_d = (datetime.now() + timedelta(days=365 * new_tenor)).strftime("%Y-%m-%d")
             actor = auth.get("name", "INSTITUTION")
 
+            # Single atomic transaction for renewal instrument + lineage record + ledger block + checkpoint
             with db_session() as conn:
                 with conn:
                     c = conn.cursor()
@@ -1475,8 +1543,8 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                     c.execute("UPDATE instruments SET status = 'Renewed', legacy_status = ? WHERE id = ?",
                               (f"Superseded by renewal {new_id}", original_fdr_id))
 
-            append_to_ledger("RENEWAL_SUBMITTED", actor, new_id,
-                             f"{renewal_type} of FDR {original_fdr_id}: new instrument {new_fdr_no} for Rs {new_amount:,.0f} submitted by {original['institution_name']}")
+                    append_to_ledger("RENEWAL_SUBMITTED", actor, new_id,
+                                     f"{renewal_type} of FDR {original_fdr_id}: new instrument {new_fdr_no} for Rs {new_amount:,.0f} submitted by {original['institution_name']}", conn=conn)
 
             self._set_headers(201)
             self.wfile.write(json.dumps({
@@ -1630,7 +1698,7 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                 else:
                     target_lien_marked = inst["lien_marked"]
 
-                # Optional maturityDate change for testing
+                # Single atomic transaction for status update and ledger record
                 with conn:
                     if "maturityDate" in payload:
                         new_mat = payload["maturityDate"]
@@ -1642,13 +1710,13 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                         WHERE id = ?
                     ''', (new_status, legacy_status, target_discrepancy, target_lien_marked, target_bank_confirmed, fdr_id))
 
-            run_alert_scanner()
+                    # Record in SHA-256 Ledger atomically within the same database transaction
+                    log_detail = f"Instrument status changed to '{new_status}': {legacy_status}"
+                    if resolution_note:
+                        log_detail += f" | Resolution note: {resolution_note}"
+                    append_to_ledger("STATUS_MODIFIED", actor, fdr_id, log_detail, conn=conn)
 
-            # Record in SHA-256 Ledger
-            log_detail = f"Instrument status changed to '{new_status}': {legacy_status}"
-            if resolution_note:
-                log_detail += f" | Resolution note: {resolution_note}"
-            append_to_ledger("STATUS_MODIFIED", actor, fdr_id, log_detail)
+            run_alert_scanner()
 
             self._set_headers(200)
             self.wfile.write(json.dumps({
