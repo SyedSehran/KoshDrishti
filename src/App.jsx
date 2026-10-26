@@ -362,7 +362,11 @@ export default function App() {
           onSelectInstrument={(fdrIdOrItem) => {
             setIsLedgerOpen(false);
             if (typeof fdrIdOrItem === 'string') {
-              const found = records.find(r => r.id === fdrIdOrItem || r.fdrNumber === fdrIdOrItem);
+              const q = fdrIdOrItem.trim().toLowerCase();
+              const found = records.find(r => 
+                (r.id && r.id.toLowerCase() === q) || 
+                (r.fdrNumber && r.fdrNumber.toLowerCase() === q)
+              );
               if (found) {
                 setActiveDrawerInstrument(found);
               }

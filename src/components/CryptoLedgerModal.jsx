@@ -151,7 +151,7 @@ export default function CryptoLedgerModal({ onClose, onSelectInstrument }) {
     <div className="modal-backdrop" onClick={onClose} style={{ zIndex: 1100 }}>
       <div 
         className="modal-dialog" 
-        style={{ maxWidth: 1040, maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
+        style={{ maxWidth: 1040, maxHeight: '92vh', height: '90vh', display: 'flex', flexDirection: 'column' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -381,7 +381,15 @@ export default function CryptoLedgerModal({ onClose, onSelectInstrument }) {
         </div>
 
         {/* Blocks Scroll View */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: 'auto',
+          padding: '16px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12
+        }}>
           {isLoading ? (
             <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ink-muted)' }}>
               Loading cryptographic ledger from SQLite...
@@ -395,6 +403,7 @@ export default function CryptoLedgerModal({ onClose, onSelectInstrument }) {
               const isExpanded = expandedBlockIndex === block.blockIndex;
               const isTamperedBlock = verificationResult && !verificationResult.valid && verificationResult.tampered_block_index === block.blockIndex;
               const rawString = `${block.blockIndex}:${block.previousHash}:${block.timestamp}:${block.action}:${block.actor}:${block.fdrId}:${block.details}`;
+              const isGenericFdr = !block.fdrId || block.fdrId === 'ALL' || block.fdrId === 'GENESIS';
 
               return (
                 <div 
@@ -411,7 +420,9 @@ export default function CryptoLedgerModal({ onClose, onSelectInstrument }) {
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
                     boxShadow: isExpanded ? '0 4px 14px rgba(0,0,0,0.08)' : 'var(--shadow-card)',
-                    border: isTamperedBlock ? '1.5px solid #fca5a5' : undefined
+                    border: isTamperedBlock ? '1.5px solid #fca5a5' : undefined,
+                    flexShrink: 0,
+                    minHeight: 'fit-content'
                   }}
                 >
                   {/* Block Header Strip */}
@@ -425,30 +436,44 @@ export default function CryptoLedgerModal({ onClose, onSelectInstrument }) {
                         {block.action}
                       </span>
 
-                      {/* Clickable FDR Badge with Drill-down Hook */}
+                      {/* FDR Badge: interactive drilldown for actual FDRs, neutral chip for ALL/GENESIS */}
                       {block.fdrId && (
-                        <button
-                          type="button"
-                          onClick={(e) => handleDrilldownFdr(e, block.fdrId)}
-                          style={{
-                            background: '#e0f2fe',
-                            border: '1px solid #7dd3fc',
-                            color: '#0369a1',
+                        isGenericFdr ? (
+                          <span className="mono" style={{
+                            background: 'var(--bg-muted)',
+                            border: '1px solid var(--border-subtle)',
+                            color: 'var(--ink-secondary)',
                             padding: '2px 8px',
                             borderRadius: 4,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 4,
                             fontSize: 11,
                             fontWeight: 600
-                          }}
-                          title={`Click to open 360° Case File for ${block.fdrId}`}
-                        >
-                          <FileText size={11} />
-                          <span className="mono">{block.fdrId}</span>
-                          <ExternalLink size={10} />
-                        </button>
+                          }}>
+                            {block.fdrId}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => handleDrilldownFdr(e, block.fdrId)}
+                            style={{
+                              background: '#e0f2fe',
+                              border: '1px solid #7dd3fc',
+                              color: '#0369a1',
+                              padding: '2px 8px',
+                              borderRadius: 4,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              fontSize: 11,
+                              fontWeight: 600
+                            }}
+                            title={`Click to open 360° Case File for ${block.fdrId}`}
+                          >
+                            <FileText size={11} />
+                            <span className="mono">{block.fdrId}</span>
+                            <ExternalLink size={10} />
+                          </button>
+                        )
                       )}
 
                       {isTamperedBlock && (
