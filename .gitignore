@@ -30,6 +30,10 @@ backend/__pycache__/
 Thumbs.db
 scratch/
 *.sqlite3-journal
+*.db-wal
+*.db-shm
+backend/*.db-wal
+backend/*.db-shm
 *.suo
 *.ntvs*
 *.njsproj

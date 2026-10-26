@@ -57,7 +57,11 @@ export default function HeaderGIGW({
   const handleDismissAlert = async (e, alertId) => {
     e.stopPropagation();
     try {
-      await fetch(`http://127.0.0.1:8000/api/v1/alerts/${alertId}/dismiss`, { method: 'POST' });
+      const token = localStorage.getItem('kosh_jwt_token') || '';
+      await fetch(`http://127.0.0.1:8000/api/v1/alerts/${alertId}/dismiss`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
     } catch {}
     setAlerts(prev => prev.filter(a => a.id !== alertId));
   };
@@ -65,7 +69,11 @@ export default function HeaderGIGW({
   // Dismiss all alerts
   const handleDismissAll = async () => {
     try {
-      await fetch('http://127.0.0.1:8000/api/v1/alerts/dismiss-all', { method: 'POST' });
+      const token = localStorage.getItem('kosh_jwt_token') || '';
+      await fetch('http://127.0.0.1:8000/api/v1/alerts/dismiss-all', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
     } catch {}
     setAlerts([]);
   };
@@ -73,7 +81,11 @@ export default function HeaderGIGW({
   // Clicking an alert opens the college 360 dossier drawer and clears the alert
   const handleAlertClick = async (alertItem) => {
     try {
-      await fetch(`http://127.0.0.1:8000/api/v1/alerts/${alertItem.id}/dismiss`, { method: 'POST' });
+      const token = localStorage.getItem('kosh_jwt_token') || '';
+      await fetch(`http://127.0.0.1:8000/api/v1/alerts/${alertItem.id}/dismiss`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
     } catch {}
     setAlerts(prev => prev.filter(a => a.id !== alertItem.id));
     setAlertsOpen(false);

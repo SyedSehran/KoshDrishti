@@ -68,8 +68,8 @@ def seed_database():
     conn.execute("PRAGMA journal_mode=WAL;")  # Enable WAL for concurrent read/write
     c = conn.cursor()
 
-    # Drop old schema to align with full 208 benchmark fields
-    c.execute("DROP TABLE IF EXISTS instruments")
+    # Schema is persistent across restarts - Never drop tables on startup
+    # Tables are created with IF NOT EXISTS
 
     # Create tables
     c.execute('''
@@ -171,6 +171,28 @@ def seed_database():
             department TEXT
         )
     ''')
+
+    # Ledger checkpoint table — protects against tail truncation attacks
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS ledger_checkpoint (
+            id INTEGER PRIMARY KEY,
+            last_block_index INTEGER NOT NULL,
+            head_hash TEXT NOT NULL,
+            total_blocks INTEGER NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+    ''')
+    c.execute("SELECT COUNT(*) FROM ledger_checkpoint")
+    if c.fetchone()[0] == 0:
+        c.execute("SELECT block_index, block_hash FROM audit_ledger ORDER BY block_index DESC LIMIT 1")
+        last_b = c.fetchone()
+        if last_b:
+            c.execute("SELECT COUNT(*) FROM audit_ledger")
+            total_b = c.fetchone()[0]
+            c.execute('''
+                INSERT INTO ledger_checkpoint (id, last_block_index, head_hash, total_blocks, updated_at)
+                VALUES (1, ?, ?, ?, datetime('now'))
+            ''', (last_b[0], last_b[1], total_b))
 
     # Seed demo users with per-user dynamic PBKDF2-HMAC cryptographic salt
     def hash_pw(email, pw):
@@ -375,15 +397,32 @@ def seed_database():
             )
         ''', (b1_hash, b2_hash))
 
-    # Seed initial alerts
-    c.execute("DELETE FROM alerts")
-    c.execute('''
-        INSERT INTO alerts (fdr_id, institution_name, alert_type, days_remaining, message, status, created_at)
-        VALUES 
-        ('FDR-2018-1005', 'Symbiosis Institute of Business & Digital Media', 'CRITICAL_30_DAY', 27, 'Mandatory 10-Year deposit matures in 27 days. Send replacement/renewal advisory.', 'PENDING', datetime('now')),
-        ('FDR-2016-1002', 'Vidyavardhaka College of Engineering', 'MATURITY_FULFILLED', -9, '10-Year lock-in completed. Two-Officer digital discharge ready for Member Secretary approval.', 'PENDING', datetime('now')),
-        ('FDR-2022-1003', '[Simulated] Apex Institute of Applied Computing', 'DISCREPANCY_ALERT', 290, 'Bank CBS mismatch: 5y tenor vs 10y mandatory APH Table 1.4 norm. AICTE lien missing.', 'PENDING', datetime('now'))
-    ''')
+        # Initialize ledger checkpoint for tail-truncation protection
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS ledger_checkpoint (
+                id INTEGER PRIMARY KEY,
+                last_block_index INTEGER NOT NULL,
+                head_hash TEXT NOT NULL,
+                total_blocks INTEGER NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+        ''')
+        c.execute("DELETE FROM ledger_checkpoint")
+        c.execute('''
+            INSERT INTO ledger_checkpoint (id, last_block_index, head_hash, total_blocks, updated_at)
+            VALUES (1, 2, ?, 3, datetime('now'))
+        ''', (b2_hash,))
+
+    # Seed initial alerts only when alerts table is completely empty
+    c.execute("SELECT COUNT(*) FROM alerts")
+    if c.fetchone()[0] == 0:
+        c.execute('''
+            INSERT INTO alerts (fdr_id, institution_name, alert_type, days_remaining, message, status, created_at)
+            VALUES 
+            ('FDR-2018-1005', 'Symbiosis Institute of Business & Digital Media', 'CRITICAL_30_DAY', 27, 'Mandatory 10-Year deposit matures in 27 days. Send replacement/renewal advisory.', 'PENDING', datetime('now')),
+            ('FDR-2016-1002', 'Vidyavardhaka College of Engineering', 'MATURITY_FULFILLED', -9, '10-Year lock-in completed. Two-Officer digital discharge ready for Member Secretary approval.', 'PENDING', datetime('now')),
+            ('FDR-2022-1003', '[Simulated] Apex Institute of Applied Computing', 'DISCREPANCY_ALERT', 290, 'Bank CBS mismatch: 5y tenor vs 10y mandatory APH Table 1.4 norm. AICTE lien missing.', 'PENDING', datetime('now'))
+        ''')
 
     conn.commit()
     conn.close()
