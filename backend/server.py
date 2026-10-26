@@ -13,6 +13,8 @@ import time
 import os
 import re
 import io
+import csv
+import base64
 import threading
 import jwt
 from datetime import datetime, timedelta
@@ -53,6 +55,7 @@ seed_database()
 
 def get_db():
     conn = sqlite3.connect(DB_FILE)
+    conn.execute("PRAGMA journal_mode=WAL;")
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -695,6 +698,143 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                 "norms": TABLE_1_4_NORMS
             }).encode('utf-8'))
 
+        # 8. Documents list for an instrument
+        elif path == "/api/v1/documents":
+            instrument_id = query.get("instrument_id", [None])[0]
+            conn = get_db()
+            c = conn.cursor()
+            if instrument_id:
+                c.execute(
+                    "SELECT id, instrument_id, filename, content_type, file_size, uploaded_by, uploaded_at FROM documents WHERE instrument_id = ? ORDER BY uploaded_at DESC",
+                    (instrument_id,)
+                )
+            else:
+                c.execute(
+                    "SELECT id, instrument_id, filename, content_type, file_size, uploaded_by, uploaded_at FROM documents ORDER BY uploaded_at DESC LIMIT 100"
+                )
+            rows = c.fetchall()
+            conn.close()
+            docs = [{
+                "id": r["id"],
+                "instrumentId": r["instrument_id"],
+                "filename": r["filename"],
+                "contentType": r["content_type"],
+                "fileSize": r["file_size"],
+                "uploadedBy": r["uploaded_by"],
+                "uploadedAt": r["uploaded_at"]
+            } for r in rows]
+            self._set_headers(200)
+            self.wfile.write(json.dumps({"documents": docs, "count": len(docs)}).encode('utf-8'))
+
+        # 9. Document download by ID
+        elif re.match(r'^/api/v1/documents/([0-9]+)$', path):
+            doc_id = re.match(r'^/api/v1/documents/([0-9]+)$', path).group(1)
+            conn = get_db()
+            c = conn.cursor()
+            c.execute("SELECT filename, content_type, file_data FROM documents WHERE id = ?", (doc_id,))
+            row = c.fetchone()
+            conn.close()
+            if not row:
+                self._set_headers(404)
+                self.wfile.write(json.dumps({"error": "Document not found"}).encode('utf-8'))
+                return
+            self.send_response(200)
+            self.send_header('Content-Type', row["content_type"])
+            self.send_header('Content-Disposition', f'attachment; filename="{row["filename"]}"')
+            for origin in ALLOWED_ORIGINS:
+                self.send_header('Access-Control-Allow-Origin', origin)
+            self.end_headers()
+            self.wfile.write(row["file_data"])
+
+        # 10. Instrument renewal/replacement lineage
+        elif re.match(r'^/api/v1/instruments/([^/]+)/lineage$', path):
+            fdr_id = re.match(r'^/api/v1/instruments/([^/]+)/lineage$', path).group(1)
+            conn = get_db()
+            c = conn.cursor()
+            c.execute("""
+                SELECT r.id, r.original_fdr_id, r.new_fdr_id, r.renewal_type, r.renewal_date,
+                       r.submitted_by, r.notes, r.created_at,
+                       i.fdr_number, i.amount, i.issuing_bank, i.status
+                FROM renewals r
+                LEFT JOIN instruments i ON i.id = r.new_fdr_id
+                WHERE r.original_fdr_id = ? OR r.new_fdr_id = ?
+                ORDER BY r.renewal_date ASC
+            """, (fdr_id, fdr_id))
+            rows = c.fetchall()
+            conn.close()
+            chain = [{
+                "id": r["id"],
+                "originalFdrId": r["original_fdr_id"],
+                "newFdrId": r["new_fdr_id"],
+                "renewalType": r["renewal_type"],
+                "renewalDate": r["renewal_date"],
+                "submittedBy": r["submitted_by"],
+                "notes": r["notes"],
+                "createdAt": r["created_at"],
+                "newFdrNumber": r["fdr_number"],
+                "newAmount": r["amount"],
+                "newBank": r["issuing_bank"],
+                "newStatus": r["status"]
+            } for r in rows]
+            self._set_headers(200)
+            self.wfile.write(json.dumps({"lineage": chain, "count": len(chain)}).encode('utf-8'))
+
+        # 11. CSV / JSON Management Report Export
+        elif path == "/api/v1/reports/export":
+            fmt = query.get("format", ["csv"])[0].lower()
+            status_f = query.get("status", ["ALL"])[0]
+            conn = get_db()
+            c = conn.cursor()
+            sql = "SELECT * FROM instruments WHERE 1=1"
+            params = []
+            if status_f != "ALL":
+                sql += " AND status = ?"
+                params.append(status_f)
+            sql += " ORDER BY status ASC, institution_name ASC"
+            c.execute(sql, params)
+            rows = c.fetchall()
+            conn.close()
+
+            if fmt == "json":
+                data = [dict(r) for r in rows]
+                self._set_headers(200)
+                self.send_header('Content-Disposition', 'attachment; filename="kosh_drishti_report.json"')
+                self.wfile.write(json.dumps({"report": data, "generated_at": datetime.utcnow().isoformat() + "Z", "count": len(data)}).encode('utf-8'))
+            else:
+                # CSV export
+                output = io.StringIO()
+                writer = csv.writer(output)
+                writer.writerow([
+                    "ID", "FDR Number", "Institution ID", "Institution Name", "Trust Name",
+                    "Region", "State", "City", "Program Type", "Amount (INR)",
+                    "Issuing Bank", "Bank Type", "IFSC", "Account Number",
+                    "Issue Date", "Maturity Date", "Tenor (Years)", "Days Remaining",
+                    "Joint Holder", "Lien Marked", "Bank Confirmed",
+                    "OCR Match %", "Status", "Legacy Status", "Has Discrepancies",
+                    "Purpose", "Is Govt Exempt", "Parent FDR ID", "Created At"
+                ])
+                for r in rows:
+                    writer.writerow([
+                        r["id"], r["fdr_number"], r["institution_id"], r["institution_name"],
+                        r["trust_name"], r["region"], r["state"], r["city"], r["program_type"],
+                        r["amount"], r["issuing_bank"], r["bank_type"], r["ifsc"],
+                        r["account_number"], r["issue_date"], r["maturity_date"],
+                        r["tenor_years"], r["days_remaining"], r["joint_holder"],
+                        bool(r["lien_marked"]), bool(r["bank_confirmed"]),
+                        r["ocr_match_pct"], r["status"], r["legacy_status"],
+                        bool(r["has_discrepancies"]), r["purpose"], bool(r["is_govt"]),
+                        r["parent_fdr_id"], r["created_at"]
+                    ])
+                csv_bytes = output.getvalue().encode('utf-8-sig')  # BOM for Excel compatibility
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/csv; charset=utf-8')
+                self.send_header('Content-Disposition', 'attachment; filename="kosh_drishti_report.csv"')
+                self.send_header('Content-Length', str(len(csv_bytes)))
+                for orig in ALLOWED_ORIGINS:
+                    self.send_header('Access-Control-Allow-Origin', orig)
+                self.end_headers()
+                self.wfile.write(csv_bytes)
+
         else:
             self._set_headers(404)
             self.wfile.write(json.dumps({"error": "Endpoint not found"}).encode('utf-8'))
@@ -739,6 +879,43 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                 extracted_text = payload.get("text")
 
             result = extract_fields_from_text(extracted_text)
+
+            # Persist the uploaded document to SQLite if instrument_id is provided
+            instrument_id = None
+            if 'multipart/form-data' in content_type:
+                # Try to extract instrument_id from form fields
+                try:
+                    boundary = content_type.split("boundary=")[1].encode()
+                    parts = raw_body.split(boundary)
+                    for part in parts:
+                        if b'name="instrument_id"' in part and b'filename=' not in part:
+                            val = part.split(b'\r\n\r\n', 1)
+                            if len(val) == 2:
+                                instrument_id = val[1].rstrip(b'\r\n--').decode('utf-8', errors='ignore').strip()
+                except Exception:
+                    pass
+            elif payload.get("instrument_id"):
+                instrument_id = payload.get("instrument_id")
+
+            if instrument_id and extracted_text:
+                # Determine filename and content type for storage
+                stored_filename = "fdr_document.pdf" if 'multipart/form-data' in content_type else "fdr_text.txt"
+                stored_content_type = "application/pdf" if 'multipart/form-data' in content_type else "text/plain"
+                file_blob = raw_body if 'multipart/form-data' in content_type else extracted_text.encode('utf-8')
+                try:
+                    dconn = get_db()
+                    dc = dconn.cursor()
+                    dc.execute(
+                        "INSERT INTO documents (instrument_id, filename, content_type, file_data, file_size, uploaded_by, uploaded_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        (instrument_id, stored_filename, stored_content_type, file_blob, len(file_blob), "institution", datetime.utcnow().isoformat() + "Z")
+                    )
+                    dconn.commit()
+                    dconn.close()
+                    result["document_stored"] = True
+                    result["instrument_id"] = instrument_id
+                except Exception:
+                    result["document_stored"] = False
+
             self._set_headers(200)
             self.wfile.write(json.dumps(result).encode('utf-8'))
 
@@ -891,6 +1068,119 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             else:
                 self._set_headers(401)
                 self.wfile.write(json.dumps({"error": "Invalid email or password"}).encode('utf-8'))
+
+        # 8. Document Upload (persistent FDR file storage)
+        elif path == "/api/v1/documents":
+            auth = authenticate_jwt(self, allowed_roles=["institution", "bureau_officer", "director"])
+            if not auth:
+                return
+
+            instrument_id = payload.get("instrumentId") or payload.get("instrument_id")
+            filename = payload.get("filename", "document.pdf")
+            content_type_file = payload.get("contentType", "application/octet-stream")
+            file_data_b64 = payload.get("fileData", "")
+
+            if not file_data_b64:
+                self._set_headers(400)
+                self.wfile.write(json.dumps({"error": "fileData (base64) is required"}).encode('utf-8'))
+                return
+
+            try:
+                file_bytes = base64.b64decode(file_data_b64)
+            except Exception:
+                self._set_headers(400)
+                self.wfile.write(json.dumps({"error": "Invalid base64 fileData"}).encode('utf-8'))
+                return
+
+            uploader = auth.get("name", auth.get("email", "unknown"))
+            conn = get_db()
+            c = conn.cursor()
+            c.execute(
+                "INSERT INTO documents (instrument_id, filename, content_type, file_data, file_size, uploaded_by, uploaded_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (instrument_id, filename, content_type_file, file_bytes, len(file_bytes), uploader, datetime.utcnow().isoformat() + "Z")
+            )
+            doc_id = c.lastrowid
+            conn.commit()
+            conn.close()
+
+            append_to_ledger("DOCUMENT_STORED", uploader, instrument_id or "GENERAL", f"Document '{filename}' ({len(file_bytes)} bytes) stored for instrument {instrument_id}")
+            self._set_headers(201)
+            self.wfile.write(json.dumps({"success": True, "documentId": doc_id, "filename": filename, "fileSize": len(file_bytes)}).encode('utf-8'))
+
+        # 9. FDR Renewal / Replacement Submission
+        elif re.match(r'^/api/v1/instruments/([^/]+)/renew$', path):
+            auth = authenticate_jwt(self, allowed_roles=["institution", "bureau_officer", "director"])
+            if not auth:
+                return
+
+            original_fdr_id = re.match(r'^/api/v1/instruments/([^/]+)/renew$', path).group(1)
+            conn = get_db()
+            c = conn.cursor()
+
+            c.execute("SELECT * FROM instruments WHERE id = ?", (original_fdr_id,))
+            original = c.fetchone()
+            if not original:
+                conn.close()
+                self._set_headers(404)
+                self.wfile.write(json.dumps({"error": f"Instrument {original_fdr_id} not found"}).encode('utf-8'))
+                return
+
+            renewal_type = payload.get("renewalType", "Rollover Renewal")
+            new_fdr_no = payload.get("fdrNumber", f"FDR/RENEWAL/{int(time.time()) % 10000}")
+            new_amount = float(payload.get("amount", original["amount"]))
+            new_bank = payload.get("issuingBank", original["issuing_bank"])
+            new_ifsc = payload.get("ifsc", original["ifsc"])
+            new_tenor = int(payload.get("tenorYears", 10))
+            notes = payload.get("notes", "")
+
+            new_id = f"FDR-RENEW-{int(time.time()) % 100000}"
+            issue_d = datetime.now().strftime("%Y-%m-%d")
+            maturity_d = (datetime.now() + timedelta(days=365 * new_tenor)).strftime("%Y-%m-%d")
+            actor = auth.get("name", "INSTITUTION")
+
+            c.execute('''
+                INSERT INTO instruments (
+                    id, fdr_number, institution_id, institution_name, trust_name,
+                    region, state, city, program_type, amount, issuing_bank,
+                    bank_type, ifsc, account_number, issue_date, maturity_date,
+                    tenor_years, days_remaining, joint_holder, lien_marked,
+                    bank_confirmed, trust_level, ocr_match_pct, status,
+                    legacy_status, has_discrepancies, purpose, is_govt, parent_fdr_id, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            ''', (
+                new_id, new_fdr_no, original["institution_id"], original["institution_name"],
+                original["trust_name"], original["region"], original["state"], original["city"],
+                original["program_type"], new_amount, new_bank, original["bank_type"],
+                new_ifsc, original["account_number"], issue_d, maturity_d, new_tenor,
+                new_tenor * 365, original["joint_holder"], 0, 0, "officer", 0.0,
+                "Pending", f"Renewal of {original_fdr_id} — awaiting bank verification",
+                0, f"Renewal/Replacement of {original['purpose']}", original["is_govt"],
+                original_fdr_id
+            ))
+
+            c.execute(
+                "INSERT INTO renewals (original_fdr_id, new_fdr_id, renewal_type, renewal_date, submitted_by, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (original_fdr_id, new_id, renewal_type, issue_d, actor, notes, datetime.utcnow().isoformat() + "Z")
+            )
+
+            # Mark original as Renewed
+            c.execute("UPDATE instruments SET status = 'Renewed', legacy_status = ? WHERE id = ?",
+                      (f"Superseded by renewal {new_id}", original_fdr_id))
+
+            conn.commit()
+            conn.close()
+
+            append_to_ledger("RENEWAL_SUBMITTED", actor, new_id,
+                             f"{renewal_type} of FDR {original_fdr_id}: new instrument {new_fdr_no} for Rs {new_amount:,.0f} submitted by {original['institution_name']}")
+
+            self._set_headers(201)
+            self.wfile.write(json.dumps({
+                "success": True,
+                "newInstrumentId": new_id,
+                "newFdrNumber": new_fdr_no,
+                "originalFdrId": original_fdr_id,
+                "renewalType": renewal_type
+            }).encode('utf-8'))
 
         else:
             self._set_headers(404)

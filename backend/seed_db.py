@@ -65,6 +65,7 @@ BANKS = [
 
 def seed_database():
     conn = sqlite3.connect(DB_FILE)
+    conn.execute("PRAGMA journal_mode=WAL;")  # Enable WAL for concurrent read/write
     c = conn.cursor()
 
     # Drop old schema to align with full 208 benchmark fields
@@ -101,6 +102,7 @@ def seed_database():
             has_discrepancies INTEGER,
             purpose TEXT,
             is_govt INTEGER DEFAULT 0,
+            parent_fdr_id TEXT,
             created_at TEXT
         )
     ''')
@@ -127,6 +129,34 @@ def seed_database():
             days_remaining INTEGER NOT NULL,
             message TEXT NOT NULL,
             status TEXT DEFAULT 'PENDING',
+            created_at TEXT NOT NULL
+        )
+    ''')
+
+    # Documents table — persistent FDR PDF/file storage
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS documents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            instrument_id TEXT,
+            filename TEXT NOT NULL,
+            content_type TEXT NOT NULL,
+            file_data BLOB NOT NULL,
+            file_size INTEGER,
+            uploaded_by TEXT,
+            uploaded_at TEXT NOT NULL
+        )
+    ''')
+
+    # Renewals table — FDR renewal/replacement lineage chain
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS renewals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            original_fdr_id TEXT NOT NULL,
+            new_fdr_id TEXT NOT NULL,
+            renewal_type TEXT NOT NULL,
+            renewal_date TEXT NOT NULL,
+            submitted_by TEXT,
+            notes TEXT,
             created_at TEXT NOT NULL
         )
     ''')
@@ -182,7 +212,7 @@ def seed_database():
             3500000, 'State Bank of India', 'Public Sector Scheduled', 'SBIN0006240',
             '40192830112', '2024-03-15', '2034-03-15', 10, 2700,
             'Member Secretary, AICTE & Chairman, Trust', 1, 1, 'bank', 99.2,
-            'Active', 'Lien confirmed', 0, 'APH Table 1.4 Deposit for Engineering & Technology (UG)', 0, datetime('now')
+            'Active', 'Lien confirmed', 0, 'APH Table 1.4 Deposit for Engineering & Technology (UG)', 0, NULL, datetime('now')
         )
     ''')
 
@@ -195,7 +225,7 @@ def seed_database():
             3500000, 'Canara Bank', 'Public Sector Scheduled', 'CNRB0002100',
             '40192830113', '2016-10-15', '2026-10-15', 10, -9,
             'Member Secretary, AICTE & Secretary, Trust', 1, 1, 'bank', 98.7,
-            'Release', 'Release requested (10-Yr Lock-in fulfilled)', 0, 'APH Table 1.4 Deposit for Engineering & Technology (UG)', 0, datetime('now')
+            'Release', 'Release requested (10-Yr Lock-in fulfilled)', 0, 'APH Table 1.4 Deposit for Engineering & Technology (UG)', 0, NULL, datetime('now')
         )
     ''')
 
@@ -208,7 +238,7 @@ def seed_database():
             3500000, 'Punjab National Bank', 'Public Sector Scheduled', 'PUNB0123400',
             '40192830114', '2022-08-10', '2027-08-10', 5, 290,
             'Chairman, Apex Trust only (AICTE missing)', 0, 0, 'declared', 78.4,
-            'Discrepancy', 'Flagged (Tenor 5y vs 10y, No AICTE Lien)', 1, 'APH Table 1.4 Deposit for Engineering & Technology (UG)', 0, datetime('now')
+            'Discrepancy', 'Flagged (Tenor 5y vs 10y, No AICTE Lien)', 1, 'APH Table 1.4 Deposit for Engineering & Technology (UG)', 0, NULL, datetime('now')
         )
     ''')
 
@@ -221,7 +251,7 @@ def seed_database():
             0, 'Reserve Bank of India / Treasury', 'Government Exemption', 'GOV-AFFIDAVIT-TN',
             'TREASURY-TN-2023', '2023-06-01', '2033-06-01', 10, 2412,
             'Director of Technical Education, Govt of Tamil Nadu', 1, 1, 'officer', 100.0,
-            'Active', 'Exempt under Table 1.4 Clause (c)', 0, 'APH Table 1.4 Exemption with State Affidavit', 1, datetime('now')
+            'Active', 'Exempt under Table 1.4 Clause (c)', 0, 'APH Table 1.4 Exemption with State Affidavit', 1, NULL, datetime('now')
         )
     ''')
 
@@ -234,7 +264,7 @@ def seed_database():
             1500000, 'HDFC Bank', 'Private Sector Scheduled', 'HDFC0001092',
             '40192830115', '2016-11-20', '2026-11-20', 10, 27,
             'Member Secretary, AICTE & President, Symbiosis', 1, 1, 'bank', 99.1,
-            'Expiring', 'Expiring in 27 days (Advisory Dispatched)', 0, 'APH Table 1.4 Deposit for Management (PG - MBA/PGDM)', 0, datetime('now')
+            'Expiring', 'Expiring in 27 days (Advisory Dispatched)', 0, 'APH Table 1.4 Deposit for Management (PG - MBA/PGDM)', 0, NULL, datetime('now')
         )
     ''')
 
@@ -277,7 +307,7 @@ def seed_database():
 
         c.execute('''
             INSERT INTO instruments VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now')
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now')
             )
         ''', (
             f"FDR-{issue_year}-{1000 + i}",
@@ -307,7 +337,8 @@ def seed_database():
             legacy_status,
             0,
             f"APH Table 1.4 Deposit for {prog['program']}",
-            is_govt
+            is_govt,
+            None
         ))
 
     # Seed Cryptographic Ledger Genesis Block

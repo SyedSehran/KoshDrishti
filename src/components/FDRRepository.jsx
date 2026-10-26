@@ -64,6 +64,48 @@ export default function FDRRepository({
     return 0;
   });
 
+  // Export to CSV
+  const handleExportCSV = () => {
+    const headers = [
+      'FDR Number', 'Institution ID', 'Institution Name', 'Trust Name',
+      'Region', 'City', 'State', 'Program Type', 'Amount (INR)',
+      'Issuing Bank', 'Issue Date', 'Maturity Date', 'Tenor (Years)',
+      'Days Remaining', 'Joint Holder', 'Lien Marked', 'Bank Confirmed',
+      'Status'
+    ];
+
+    const rows = sortedRecords.map(r => [
+      `"${r.fdrNumber || ''}"`,
+      `"${r.institutionId || ''}"`,
+      `"${(r.institutionName || '').replace(/"/g, '""')}"`,
+      `"${(r.trustName || '').replace(/"/g, '""')}"`,
+      `"${r.region || ''}"`,
+      `"${r.city || ''}"`,
+      `"${r.state || ''}"`,
+      `"${(r.programType || '').replace(/"/g, '""')}"`,
+      r.amount || 0,
+      `"${(r.issuingBank || '').replace(/"/g, '""')}"`,
+      `"${r.issueDate || ''}"`,
+      `"${r.maturityDate || ''}"`,
+      r.tenorYears || 0,
+      r.daysRemaining || 0,
+      `"${(r.jointHolderName || '').replace(/"/g, '""')}"`,
+      r.lienMarked ? 'YES' : 'NO',
+      r.bankConfirmed ? 'YES' : 'NO',
+      `"${r.status || ''}"`
+    ]);
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `aicte_kosh_drishti_fdr_report_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Helpers
   const formatLakhs = (amt) => {
     if (amt >= 10000000) return `₹ ${(amt / 10000000).toFixed(2)} Cr`;
@@ -159,6 +201,17 @@ export default function FDRRepository({
               <option value="confidence_desc">Scrutiny Score</option>
             </select>
           </div>
+
+          {/* Export Report Button */}
+          <button
+            onClick={handleExportCSV}
+            className="btn btn-secondary btn-sm"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px' }}
+            title="Export filtered regulatory deposit ledger to CSV"
+          >
+            <Download size={13} />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 

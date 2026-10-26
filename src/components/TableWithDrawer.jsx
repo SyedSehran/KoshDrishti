@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Filter, ArrowUpDown, ShieldAlert, FileText, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, ArrowUpDown, ShieldAlert, FileText, ArrowRight, CheckCircle2, Download } from 'lucide-react';
 import { ExpiryChip, TrustStamp } from './SignatureVisuals';
 
 export default function TableWithDrawer({
@@ -152,6 +152,56 @@ export default function TableWithDrawer({
             <option value="maturity_asc">Maturity Date (Earliest)</option>
             <option value="ocr_desc">OCR Match %</option>
           </select>
+
+          {/* Export to CSV Button */}
+          <button
+            type="button"
+            onClick={() => {
+              const headers = [
+                'FDR Number', 'Institution ID', 'Institution Name', 'Trust Name',
+                'Region', 'City', 'State', 'Program Type', 'Amount (INR)',
+                'Issuing Bank', 'Issue Date', 'Maturity Date', 'Tenor (Years)',
+                'Days Remaining', 'Joint Holder', 'Lien Marked', 'Bank Confirmed',
+                'OCR Match %', 'Status'
+              ];
+              const rows = sorted.map(r => [
+                `"${r.fdrNumber || ''}"`,
+                `"${r.institutionId || ''}"`,
+                `"${(r.institutionName || '').replace(/"/g, '""')}"`,
+                `"${(r.trustName || '').replace(/"/g, '""')}"`,
+                `"${r.region || ''}"`,
+                `"${r.city || ''}"`,
+                `"${r.state || ''}"`,
+                `"${(r.programType || '').replace(/"/g, '""')}"`,
+                r.amount || 0,
+                `"${(r.issuingBank || '').replace(/"/g, '""')}"`,
+                `"${r.issueDate || ''}"`,
+                `"${r.maturityDate || ''}"`,
+                r.tenorYears || 0,
+                r.daysRemaining || 0,
+                `"${(r.jointHolderName || '').replace(/"/g, '""')}"`,
+                r.lienMarked ? 'YES' : 'NO',
+                r.bankConfirmed ? 'YES' : 'NO',
+                r.ocrMatchPct || 0,
+                `"${r.status || ''}"`
+              ]);
+              const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+              const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.setAttribute('href', url);
+              link.setAttribute('download', `kosh_drishti_master_register_${new Date().toISOString().slice(0, 10)}.csv`);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
+            className="btn btn-secondary btn-sm"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 12px' }}
+            title="Export filtered records to regulatory CSV"
+          >
+            <Download size={13} />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 

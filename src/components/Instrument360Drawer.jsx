@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
-import { X, Building2, Landmark, Calendar, ShieldCheck, FileText, ArrowRight, ShieldAlert, CheckCircle2, Download, Printer, ExternalLink, Award, FileSpreadsheet, Lock } from 'lucide-react';
+import { X, Building2, Landmark, Calendar, ShieldCheck, FileText, ArrowRight, ShieldAlert, CheckCircle2, Download, Printer, RefreshCw } from 'lucide-react';
 import { ExpiryChip, TrustStamp } from './SignatureVisuals';
+import DocumentManager from './DocumentManager';
+import RenewalModal from './RenewalModal';
 
 export default function Instrument360Drawer({ 
   instrument, 
   onClose, 
   onOpenCompareSources, 
   onOpenTwoOfficerApproval, 
-  onOpenAuditLog 
+  onOpenAuditLog,
+  authToken
 }) {
-  if (!instrument) return null;
+  // All hooks MUST be called before any early return (Rules of Hooks)
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showRenewalModal, setShowRenewalModal] = useState(false);
 
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'aph' | 'timeline' | 'cbs'
+  if (!instrument) return null;
 
   const caseId = `CF-2026-${instrument.id || '8821'}`;
 
@@ -138,12 +143,13 @@ export default function Instrument360Drawer({
           </div>
 
           {/* Sub-Tabs Navigation */}
-          <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+          <div style={{ display: 'flex', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
             {[
               { id: 'overview', label: '1. Case Summary' },
               { id: 'aph', label: '2. APH Table 1.4 Norms' },
               { id: 'cbs', label: '3. CBS & Bank Cross-Check' },
-              { id: 'timeline', label: '4. 360° Audit Trail' }
+              { id: 'timeline', label: '4. 360° Audit Trail' },
+              { id: 'documents', label: '5. Documents' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -493,6 +499,26 @@ export default function Instrument360Drawer({
               </div>
             </div>
           )}
+
+          {/* TAB 5: REGULATORY DOCUMENTS & VERIFICATION SCANS */}
+          {activeTab === 'documents' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <h4 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--ink-secondary)', letterSpacing: '0.04em', marginBottom: 6 }}>
+                  Statutory Documents & Verification Scans
+                </h4>
+                <p style={{ fontSize: 11.5, color: 'var(--ink-muted)', margin: 0 }}>
+                  Upload, store, and verify original Fixed Deposit Receipts, Bank Confirmation Letters, Joint Lien Endorsements, and Board Resolutions for regulatory scrutiny.
+                </p>
+              </div>
+
+              <DocumentManager
+                instrumentId={instrument.fdrNumber || String(instrument.id)}
+                authToken={authToken}
+                readOnly={false}
+              />
+            </div>
+          )}
         </div>
 
         {/* 3. Official Regulatory Case File Footer */}
@@ -529,6 +555,26 @@ export default function Instrument360Drawer({
             </button>
           </div>
 
+          {/* Renewal & Documents action buttons */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setShowRenewalModal(true)}
+              className="btn btn-sm"
+              style={{ background: '#FF6B35', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              <RefreshCw size={13} /> Submit Renewal / Replacement FDR
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('documents')}
+              className="btn btn-secondary btn-sm"
+              style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              <FileText size={13} /> Manage Documents
+            </button>
+          </div>
+
           <button 
             type="button" 
             onClick={onClose} 
@@ -539,6 +585,18 @@ export default function Instrument360Drawer({
           </button>
         </div>
       </div>
+
+      {/* Renewal Modal */}
+      {showRenewalModal && (
+        <RenewalModal
+          fdrRecord={instrument}
+          authToken={authToken}
+          onClose={() => setShowRenewalModal(false)}
+          onSuccess={() => {
+            setTimeout(() => setShowRenewalModal(false), 2000);
+          }}
+        />
+      )}
     </div>
   );
 }
