@@ -20,17 +20,17 @@ export default function HeaderGIGW({
   const [loginMenuOpen, setLoginMenuOpen] = useState(false);
   const [alerts, setAlerts] = useState([]);
   const [currentUser, setCurrentUser] = useState({
-    name: "Rajesh Sharma",
+    name: "Shri Alok K. Mishra",
     email: "officer@aicte.gov.in",
     role: "bureau_officer",
     department: "Regulation Bureau"
   });
 
   const ROLE_ACCOUNTS = {
-    bureau_officer: { email: 'officer@aicte.gov.in', pw: 'Officer@123', name: 'Rajesh Sharma', role: 'bureau_officer' },
-    director: { email: 'director@aicte.gov.in', pw: 'Director@123', name: 'Prof. Rajive Kumar', role: 'director' },
-    institution: { email: 'college@kalinga.edu.in', pw: 'College@123', name: 'Dr. S. Mohanty', role: 'institution' },
-    bank_validator: { email: 'validator@sbi.co.in', pw: 'Bank@123', name: 'A. K. Verma', role: 'bank_validator' }
+    bureau_officer: { email: 'officer@aicte.gov.in', pw: 'Officer@123', name: 'Shri Alok K. Mishra', role: 'bureau_officer', badge: 'Scrutiny Officer' },
+    director: { email: 'director@aicte.gov.in', pw: 'Director@123', name: 'Prof. Rajive Kumar', role: 'director', badge: 'Member Secy' },
+    institution: { email: 'college@kalinga.edu.in', pw: 'College@123', name: 'Dr. S. Mohanty', role: 'institution', badge: 'College Desk' },
+    bank_validator: { email: 'validator@sbi.co.in', pw: 'Bank@123', name: 'A. K. Verma', role: 'bank_validator', badge: 'Bank Desk' }
   };
 
   // Login handler using backend PyJWT auth endpoint
@@ -472,10 +472,10 @@ export default function HeaderGIGW({
                   Select Authenticated Role (PyJWT)
                 </div>
                 {[
-                  { name: 'Scrutiny Officer', email: 'officer@aicte.gov.in', pw: 'Officer@123', role: 'bureau_officer' },
-                  { name: 'Approving Authority', email: 'director@aicte.gov.in', pw: 'Director@123', role: 'director' },
-                  { name: 'College Nodal Desk', email: 'college@kalinga.edu.in', pw: 'College@123', role: 'institution' },
-                  { name: 'Bank Branch Desk', email: 'validator@sbi.co.in', pw: 'Bank@123', role: 'bank_validator' }
+                  { name: 'Shri Alok K. Mishra', roleTitle: 'Senior Scrutiny Officer', dept: 'AICTE Regulation Bureau', email: 'officer@aicte.gov.in', pw: 'Officer@123', role: 'bureau_officer', badge: 'Scrutiny Officer' },
+                  { name: 'Prof. Rajive Kumar', roleTitle: 'Member Secretary & Sanction Auth', dept: 'AICTE Directorate', email: 'director@aicte.gov.in', pw: 'Director@123', role: 'director', badge: 'Member Secy' },
+                  { name: 'Dr. S. Mohanty', roleTitle: 'College Registrar & Nodal Officer', dept: 'Kalinga Institute of Tech', email: 'college@kalinga.edu.in', pw: 'College@123', role: 'institution', badge: 'College Desk' },
+                  { name: 'A. K. Verma', roleTitle: 'Chief Manager (CBS Operations)', dept: 'State Bank of India', email: 'validator@sbi.co.in', pw: 'Bank@123', role: 'bank_validator', badge: 'Bank Desk' }
                 ].map(u => (
                   <button
                     key={u.role}
@@ -496,23 +496,40 @@ export default function HeaderGIGW({
                       color: 'var(--ink-primary)'
                     }}
                   >
-                    <div style={{ fontWeight: 600 }}>{u.name}</div>
-                    <div className="mono" style={{ fontSize: 10, color: 'var(--ink-muted)' }}>{u.email}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontWeight: 700 }}>{u.name}</span>
+                      <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: '#f1f5f9', color: 'var(--ink-secondary)' }}>
+                        {u.badge}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--color-amber-600)', fontWeight: 600 }}>{u.roleTitle}</div>
+                    <div className="mono" style={{ fontSize: 10, color: 'var(--ink-muted)' }}>{u.email} • {u.dept}</div>
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* User Menu Dropdown */}
+          {/* User Menu Dropdown - Clear Persona Name & Segregation Badge */}
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="btn btn-ink-primary btn-sm"
-              style={{ height: 36, display: 'flex', alignItems: 'center', gap: 6 }}
+              style={{ height: 36, display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px' }}
+              title={`Logged in as ${currentUser.name} (${currentUser.role})`}
             >
               <User size={13} />
-              <span>{currentUser.name.split(' ')[0]}</span>
+              <span style={{ fontWeight: 600 }}>{currentUser.name}</span>
+              <span style={{
+                fontSize: 10,
+                padding: '1px 6px',
+                borderRadius: 4,
+                background: 'rgba(255, 255, 255, 0.2)',
+                fontWeight: 600,
+                letterSpacing: '0.02em'
+              }}>
+                {currentUser.role === 'director' ? 'Member Secy' : currentUser.role === 'institution' ? 'College' : currentUser.role === 'bank_validator' ? 'Bank' : 'Scrutiny Officer'}
+              </span>
               <ChevronDown size={11} />
             </button>
 
@@ -522,20 +539,32 @@ export default function HeaderGIGW({
                   position: 'absolute',
                   right: 0,
                   top: 42,
-                  width: 220,
+                  width: 250,
                   background: '#ffffff',
                   border: '1px solid var(--border-medium)',
                   borderRadius: 'var(--radius-sm)',
                   boxShadow: 'var(--shadow-modal)',
                   zIndex: 200,
-                  padding: 6
+                  padding: 8
                 }}
               >
-                <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border-subtle)', fontSize: 11 }}>
-                  <div style={{ fontWeight: 700, color: 'var(--ink-primary)' }}>{currentUser.name}</div>
-                  <div style={{ color: 'var(--ink-muted)' }}>{currentUser.email}</div>
-                  <div style={{ color: 'var(--color-amber-600)', fontWeight: 600, marginTop: 2 }}>
-                    {currentUser.role === 'director' ? 'Director / Sanctions Authority' : currentUser.role === 'institution' ? 'College Nodal Desk' : currentUser.role === 'bank_validator' ? 'Bank Branch Validator' : 'Regulation Scrutiny Officer'}
+                <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border-subtle)', fontSize: 11.5 }}>
+                  <div style={{ fontWeight: 700, color: 'var(--ink-primary)', fontSize: 13 }}>{currentUser.name}</div>
+                  <div style={{ color: 'var(--ink-muted)', fontSize: 11 }}>{currentUser.email}</div>
+                  <div style={{ color: 'var(--color-amber-600)', fontWeight: 600, marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Shield size={12} />
+                    <span>
+                      {currentUser.role === 'director'
+                        ? 'Member Secretary & Approving Authority'
+                        : currentUser.role === 'institution'
+                        ? 'Technical Institution Nodal Desk'
+                        : currentUser.role === 'bank_validator'
+                        ? 'Bank Branch Verification Desk'
+                        : 'Senior Regulation Scrutiny Officer'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 10.5, color: 'var(--ink-secondary)', marginTop: 2 }}>
+                    {currentUser.department || 'AICTE Regulation Bureau'}
                   </div>
                 </div>
 

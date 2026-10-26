@@ -178,7 +178,7 @@ def seed_database():
         return hashlib.pbkdf2_hmac('sha256', pw.encode('utf-8'), salt, 100000).hex()
 
     demo_users = [
-        ("officer@aicte.gov.in", hash_pw("officer@aicte.gov.in", "Officer@123"), "Rajesh Sharma", "bureau_officer", "Regulation Bureau"),
+        ("officer@aicte.gov.in", hash_pw("officer@aicte.gov.in", "Officer@123"), "Shri Alok K. Mishra", "bureau_officer", "Regulation Bureau"),
         ("director@aicte.gov.in", hash_pw("director@aicte.gov.in", "Director@123"), "Prof. Rajive Kumar", "director", "Member Secretary AICTE"),
         ("college@kalinga.edu.in", hash_pw("college@kalinga.edu.in", "College@123"), "Dr. S. Mohanty", "institution", "Kalinga Institute Desk"),
         ("validator@sbi.co.in", hash_pw("validator@sbi.co.in", "Bank@123"), "A. K. Verma", "bank_validator", "SBI Branch Operations")
