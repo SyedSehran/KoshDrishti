@@ -236,8 +236,8 @@ export default function App() {
         setTextSize={setTextSize}
       />
 
-      {/* Main Canvas Container - Edge-to-Edge Full Width */}
-      <main style={{ flex: 1, padding: '20px 24px', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* Main Canvas Container - Balanced Stature & Proportion */}
+      <main style={{ flex: 1, padding: '24px 28px', maxWidth: 1720, margin: '0 auto', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
 
         {/* ROLE 1: Approving Authority / Director View */}
