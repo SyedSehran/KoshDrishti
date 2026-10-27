@@ -287,26 +287,55 @@ export function generateSyntheticSeedDataset(targetCount = 208) {
     const prog = programs[i % programs.length];
     const statusChoice = statuses[i % statuses.length];
 
-    // Compute realistic issue & maturity dates
-    const issueYear = 2016 + (i % 8);
+    // Distribute maturity over realistic 10-year regulatory horizon (2026 to 2035)
+    const bucket = i % 20;
+    let maturityYear;
+    let maturityMonth = 1 + (i % 12);
+    let maturityDay = 1 + (i % 27);
+    let finalStatus;
+
+    if (prog.isGovt) {
+      finalStatus = "Active";
+      maturityYear = 2029 + (i % 6);
+    } else if (bucket === 0 || bucket === 1) {
+      finalStatus = "Expiring";
+      maturityYear = 2026;
+      maturityMonth = bucket === 0 ? 11 : 12;
+      maturityDay = 1 + (i % 20);
+    } else if (bucket === 2 || bucket === 3) {
+      finalStatus = "Matured";
+      maturityYear = 2026;
+      maturityMonth = 1 + (i % 8);
+    } else if (bucket === 4 || bucket === 5) {
+      finalStatus = "Renewed";
+      maturityYear = 2026;
+      maturityMonth = 1 + (i % 9);
+    } else if (bucket === 6) {
+      finalStatus = "Released";
+      maturityYear = 2026;
+      maturityMonth = 1 + (i % 10);
+    } else if (bucket === 7) {
+      finalStatus = "Discrepancy";
+      maturityYear = 2027 + (i % 4);
+    } else if (bucket === 8) {
+      finalStatus = "Pending";
+      maturityYear = 2034 + (i % 2);
+    } else {
+      finalStatus = "Active";
+      maturityYear = 2027 + (i % 9);
+    }
+
     const tenor = prog.tenorYears;
-    const maturityYear = issueYear + tenor;
-    const issueMonth = String(1 + (i % 12)).padStart(2, '0');
-    const issueDay = String(1 + (i % 28)).padStart(2, '0');
-    const issueDate = `${issueYear}-${issueMonth}-${issueDay}`;
-    const maturityDate = `${maturityYear}-${issueMonth}-${issueDay}`;
+    const issueYear = maturityYear - (tenor || 10);
+    const mMonthStr = String(maturityMonth).padStart(2, '0');
+    const mDayStr = String(maturityDay).padStart(2, '0');
+    const maturityDate = `${maturityYear}-${mMonthStr}-${mDayStr}`;
+    const issueDate = `${issueYear}-${mMonthStr}-${mDayStr}`;
 
     // Compute days remaining from Oct 2026
     const maturityMs = new Date(maturityDate).getTime();
     const todayMs = new Date('2026-10-24').getTime();
     let daysRemaining = Math.round((maturityMs - todayMs) / (1000 * 60 * 60 * 24));
-
-    let finalStatus = statusChoice;
-    if (daysRemaining <= 0 && statusChoice !== "Released") {
-      finalStatus = i % 2 === 0 ? "Matured" : "Renewed";
-    } else if (daysRemaining > 0 && daysRemaining <= 60) {
-      finalStatus = "Expiring";
-    }
 
     const realInst = REAL_INSTITUTIONS_BASE[i % REAL_INSTITUTIONS_BASE.length];
     const instName = `${realInst.name} [Campus ${Math.floor(i / REAL_INSTITUTIONS_BASE.length) + 1}]`;

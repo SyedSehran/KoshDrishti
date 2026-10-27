@@ -73,8 +73,15 @@ export default function RenewalModal({ fdrRecord, authToken, onClose, onSuccess 
     <div
       onClick={onClose}
       style={{
-        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(15, 23, 42, 0.75)',
+        backdropFilter: 'blur(5px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 110000,
+        padding: 16
       }}
     >
       <div

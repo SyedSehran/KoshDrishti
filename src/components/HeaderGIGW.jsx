@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, User, Shield, HelpCircle, FileText, CheckCircle2, Bookmark, Award, Bell, KeyRound, LogIn, X, CheckCheck, ExternalLink } from 'lucide-react';
+import { Search, ChevronDown, User, Shield, FileText, CheckCircle2, Award, Bell, KeyRound, X, ExternalLink } from 'lucide-react';
 
 export default function HeaderGIGW({
   currentRole,
@@ -486,7 +486,7 @@ export default function HeaderGIGW({
                 {[
                   { name: 'Shri Alok K. Mishra', roleTitle: 'Senior Scrutiny Officer', dept: 'AICTE Regulation Bureau', email: 'officer@aicte.gov.in', pw: 'Officer@123', role: 'bureau_officer', badge: 'Scrutiny Officer Desk' },
                   { name: 'Prof. Rajive Kumar', roleTitle: 'Regional Director & Sanctioning Authority', dept: 'AICTE Regional Directorate', email: 'director@aicte.gov.in', pw: 'Director@123', role: 'director', badge: 'Regional Director Desk' },
-                  { name: 'Dr. S. Mohanty', roleTitle: 'College Registrar & Nodal Officer', dept: 'Kalinga Institute of Tech', email: 'college@kalinga.edu.in', pw: 'College@123', role: 'institution', badge: 'College Nodal Desk' },
+                  { name: 'Dr. S. Mohanty', roleTitle: 'College Registrar & Nodal Officer', dept: 'Kalinga Institute of Advanced Technology', email: 'college@kalinga.edu.in', pw: 'College@123', role: 'institution', badge: 'College Nodal Desk' },
                   { name: 'A. K. Verma', roleTitle: 'Chief Manager (CBS Operations)', dept: 'State Bank of India', email: 'validator@sbi.co.in', pw: 'Bank@123', role: 'bank_validator', badge: 'Bank Branch Desk' }
                 ].map(u => (
                   <button

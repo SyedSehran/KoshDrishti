@@ -30,6 +30,16 @@ try:
 except ImportError:
     PYPDF_AVAILABLE = False
 
+# Load .env if present
+env_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(env_path):
+    with open(env_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip())
+
 DB_FILE = os.path.join(os.path.dirname(__file__), "vishwas_fdr.db")
 
 # Secrets configuration
@@ -1219,14 +1229,24 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
             self._set_headers(200)
             self.wfile.write(json.dumps(result).encode('utf-8'))
 
-        # 4. Tamper Ledger Block (RBAC: director, bureau_officer, or demo evaluation fallback)
+        # 4. Tamper Ledger Block (Gated by DEMO_MODE=1 env flag or officer JWT)
         elif path == "/api/v1/ledger/tamper":
+            demo_mode_active = os.environ.get("DEMO_MODE", "0") in ("1", "true", "TRUE")
             auth_header = self.headers.get("Authorization", "")
+            
+            if not demo_mode_active and not auth_header.startswith("Bearer "):
+                self._set_headers(403)
+                self.wfile.write(json.dumps({
+                    "error": "Forbidden: Ledger tampering simulation is disabled. Set DEMO_MODE=1 or provide an authenticated officer JWT.",
+                    "code": "TAMPER_ENDPOINT_DISABLED"
+                }).encode('utf-8'))
+                return
+
             if auth_header.startswith("Bearer "):
                 auth = authenticate_jwt(self, allowed_roles=["director", "bureau_officer"])
                 if not auth:
                     return
-            elif JWT_MODE != "DEMO_EVALUATION_FALLBACK":
+            elif not demo_mode_active:
                 self._set_headers(401)
                 self.wfile.write(json.dumps({"error": "Unauthorized: Missing Bearer token"}).encode('utf-8'))
                 return
@@ -1243,14 +1263,24 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                 "message": "Block #1 details altered in SQLite table. Verify endpoint will now flag SHA-256 hash mismatch."
             }).encode('utf-8'))
 
-        # 5. Repair Ledger Block (RBAC: director, bureau_officer, or demo evaluation fallback)
+        # 5. Repair Ledger Block (Gated by DEMO_MODE=1 env flag or officer JWT)
         elif path == "/api/v1/ledger/repair":
+            demo_mode_active = os.environ.get("DEMO_MODE", "0") in ("1", "true", "TRUE")
             auth_header = self.headers.get("Authorization", "")
+            
+            if not demo_mode_active and not auth_header.startswith("Bearer "):
+                self._set_headers(403)
+                self.wfile.write(json.dumps({
+                    "error": "Forbidden: Ledger repair simulation is disabled. Set DEMO_MODE=1 or provide an authenticated officer JWT.",
+                    "code": "REPAIR_ENDPOINT_DISABLED"
+                }).encode('utf-8'))
+                return
+
             if auth_header.startswith("Bearer "):
                 auth = authenticate_jwt(self, allowed_roles=["director", "bureau_officer"])
                 if not auth:
                     return
-            elif JWT_MODE != "DEMO_EVALUATION_FALLBACK":
+            elif not demo_mode_active:
                 self._set_headers(401)
                 self.wfile.write(json.dumps({"error": "Unauthorized: Missing Bearer token"}).encode('utf-8'))
                 return

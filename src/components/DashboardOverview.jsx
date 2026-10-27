@@ -6,15 +6,12 @@ import {
   IndianRupee, 
   FileCheck2, 
   Layers, 
-  Building, 
   ArrowUpRight, 
   Zap, 
   Download, 
   Eye, 
   FileText,
-  AlertOctagon,
-  TrendingUp,
-  RefreshCw
+  TrendingUp
 } from 'lucide-react';
 
 export default function DashboardOverview({ 

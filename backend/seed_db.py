@@ -301,10 +301,57 @@ def seed_database():
         amount = 0 if is_govt else prog['minAmount']
         tenor = prog['tenorYears'] if not is_govt else 10
 
-        # Spread maturity over realistic runway
-        m_month = (i % 12) + 1
-        m_year = 2026 if m_month <= 11 else 2027
-        m_day = (i % 27) + 1
+        # Spread maturity over realistic 10-year regulatory horizon (2026 to 2035)
+        bucket = i % 20
+        if is_govt:
+            status = "Active"
+            legacy_status = "Exempt with Affidavit"
+            m_year = 2029 + (i % 6)
+            m_month = (i % 12) + 1
+            m_day = (i % 27) + 1
+        elif bucket in (0, 1):
+            status = "Expiring"
+            m_year = 2026
+            m_month = 11 if bucket == 0 else 12
+            m_day = 1 + (i % 20)
+            legacy_status = "Expiring (<60 days)"
+        elif bucket in (2, 3):
+            status = "Matured"
+            m_year = 2026
+            m_month = 1 + (i % 8)
+            m_day = 1 + (i % 25)
+            legacy_status = "10-Year Lock-in Fulfilled"
+        elif bucket in (4, 5):
+            status = "Renewed"
+            m_year = 2026
+            m_month = 1 + (i % 9)
+            m_day = 1 + (i % 25)
+            legacy_status = "Rolled over to new lien"
+        elif bucket == 6:
+            status = "Released"
+            m_year = 2026
+            m_month = 1 + (i % 10)
+            m_day = 1 + (i % 25)
+            legacy_status = "Lien Discharged (NOC Issued)"
+        elif bucket == 7:
+            status = "Discrepancy"
+            m_year = 2027 + (i % 4)
+            m_month = (i % 12) + 1
+            m_day = (i % 27) + 1
+            legacy_status = "CBS Lien / Term Mismatch"
+        elif bucket == 8:
+            status = "Pending"
+            m_year = 2034 + (i % 2)
+            m_month = (i % 12) + 1
+            m_day = (i % 27) + 1
+            legacy_status = "Awaiting Officer Scrutiny"
+        else:
+            status = "Active"
+            m_year = 2027 + (i % 9)
+            m_month = (i % 12) + 1
+            m_day = (i % 27) + 1
+            legacy_status = "Lien confirmed"
+
         maturity_date = f"{m_year}-{m_month:02d}-{m_day:02d}"
         issue_year = m_year - (tenor if tenor > 0 else 10)
         issue_date = f"{issue_year}-{m_month:02d}-{m_day:02d}"
@@ -313,19 +360,6 @@ def seed_database():
         today = datetime(2026, 10, 24)
         mat_dt = datetime(m_year, m_month, m_day)
         days_rem = (mat_dt - today).days
-
-        if is_govt:
-            status = "Active"
-            legacy_status = "Exempt with Affidavit"
-        elif days_rem <= 0:
-            status = "Matured" if i % 2 == 0 else "Renewed"
-            legacy_status = "Matured (FDR fulfilled)" if status == "Matured" else "Rolled over to new lien"
-        elif days_rem <= 60:
-            status = "Expiring"
-            legacy_status = f"Expiring ({days_rem} days left)"
-        else:
-            status = "Active"
-            legacy_status = "Lien confirmed"
 
         c.execute('''
             INSERT INTO instruments VALUES (

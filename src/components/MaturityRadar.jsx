@@ -9,11 +9,7 @@ import {
   Building2, 
   CheckCircle2, 
   ChevronRight, 
-  ArrowRight, 
-  Mail, 
-  Smartphone, 
-  ShieldAlert,
-  Layers
+  ArrowRight
 } from 'lucide-react';
 
 export default function MaturityRadar({ records, onSelectFDR, onOpenLineageModal }) {

@@ -3,25 +3,23 @@ import {
   CheckCircle2, 
   Clock, 
   RotateCcw, 
-  ShieldCheck, 
   FileClock, 
   ShieldAlert, 
   IndianRupee,
   Layers,
-  Sparkles,
-  TrendingUp,
   FileCheck2
 } from 'lucide-react';
 
 export default function KPIRowExactPS({ records, activeStatusFilter, onSelectStatusFilter }) {
   // Aggregate exact counts matching Problem Statement 26265
   const activeCount = records.filter(r => r.status === 'Active').length;
-  const expiringCount = records.filter(r => r.status === 'Expiring' || (r.daysRemaining > 0 && r.daysRemaining <= 60)).length;
-  const maturedCount = records.filter(r => r.status === 'Matured' || (r.daysRemaining <= 0 && r.status !== 'Released')).length;
+  const expiringCount = records.filter(r => r.status === 'Expiring' || (r.daysRemaining > 0 && r.daysRemaining <= 60 && r.status !== 'Discrepancy')).length;
+  const maturedCount = records.filter(r => r.status === 'Matured').length;
   const renewedCount = records.filter(r => r.status === 'Renewed').length;
   const releasedCount = records.filter(r => r.status === 'Release' || r.status === 'Released').length;
   const pendingCount = records.filter(r => r.status === 'Pending').length;
   const discrepancyCount = records.filter(r => r.status === 'Discrepancy' || r.hasDiscrepancies).length;
+  const uniqueInstitutions = new Set(records.map(r => r.institutionName || r.institution).filter(Boolean)).size || records.length;
 
   const totalAmount = records.reduce((sum, r) => sum + (r.amount || 0), 0);
   const totalCrores = (totalAmount / 10000000).toFixed(2);
@@ -148,7 +146,7 @@ export default function KPIRowExactPS({ records, activeStatusFilter, onSelectSta
               Instrument Lifecycle Overview
             </span>
             <div style={{ fontSize: 13, color: 'var(--ink-muted)', marginTop: 2 }}>
-              Tracking {records.length} technical institutions across India (APH 2024-27 Table 1.4)
+              Tracking {records.length} deposit instruments across {uniqueInstitutions} technical institutions (APH 2024-27 Table 1.4)
             </div>
           </div>
         </div>

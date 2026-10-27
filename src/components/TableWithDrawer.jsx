@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Filter, ArrowUpDown, ShieldAlert, FileText, ArrowRight, CheckCircle2, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, ShieldAlert, FileText, CheckCircle2, Download } from 'lucide-react';
 import { ExpiryChip, TrustStamp } from './SignatureVisuals';
 
 export default function TableWithDrawer({
