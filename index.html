@@ -13,6 +13,28 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.addEventListener('error', function(e) {
+        var el = document.getElementById('runtime-error-banner');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'runtime-error-banner';
+          el.style = 'position:fixed;top:0;left:0;right:0;background:#991b1b;color:#fff;padding:20px;z-index:9999999;font-family:sans-serif;font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,0.5)';
+          document.body.prepend(el);
+        }
+        el.innerHTML = '<strong style="font-size:16px;">⚠️ JavaScript Error:</strong> ' + e.message + '<br><small style="color:#fca5a5;">' + (e.filename || '') + ':' + (e.lineno || '') + '</small><pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:6px;overflow:auto;margin-top:10px;">' + (e.error && e.error.stack ? e.error.stack : 'No stack') + '</pre>';
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        var el = document.getElementById('runtime-error-banner');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'runtime-error-banner';
+          el.style = 'position:fixed;top:0;left:0;right:0;background:#991b1b;color:#fff;padding:20px;z-index:9999999;font-family:sans-serif;font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,0.5)';
+          document.body.prepend(el);
+        }
+        el.innerHTML = '<strong style="font-size:16px;">⚠️ Unhandled Promise Error:</strong> ' + (e.reason ? (e.reason.message || e.reason) : 'Unknown') + '<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:6px;overflow:auto;margin-top:10px;">' + (e.reason && e.reason.stack ? e.reason.stack : '') + '</pre>';
+      });
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
