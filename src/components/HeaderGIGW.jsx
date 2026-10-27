@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, User, Shield, FileText, CheckCircle2, Award, Bell, KeyRound, X, ExternalLink } from 'lucide-react';
+import { Search, ChevronDown, User, Shield, FileText, CheckCircle2, Award, Bell, KeyRound, X, ExternalLink, HelpCircle, CheckCheck } from 'lucide-react';
 
 export default function HeaderGIGW({
   currentRole,

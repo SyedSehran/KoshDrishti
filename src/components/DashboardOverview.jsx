@@ -11,7 +11,8 @@ import {
   Download, 
   Eye, 
   FileText,
-  TrendingUp
+  TrendingUp,
+  AlertOctagon
 } from 'lucide-react';
 
 export default function DashboardOverview({ 

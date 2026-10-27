@@ -12,7 +12,8 @@ import {
   Scan, 
   FileCode,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  FileCheck2
 } from 'lucide-react';
 
 export default function FDRDossierModal({ 
