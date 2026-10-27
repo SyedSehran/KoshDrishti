@@ -87,7 +87,7 @@ export default function ReleaseWorkflowModal({
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: currentStep === 3 ? 'var(--ramp-jade-text)' : 'var(--ink-muted)', fontWeight: 600 }}>
             <span>{currentStep === 3 ? '✓' : '3.'}</span>
-            <span>3. Member Secretary NOC Order</span>
+            <span>3. Regional Director Discharge Order</span>
           </div>
         </div>
 
@@ -195,7 +195,7 @@ export default function ReleaseWorkflowModal({
               {/* Order Reference */}
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: 'var(--ink-secondary)', marginBottom: 16 }}>
                 <div>
-                  <div><strong>Ref No:</strong> <span className="mono">AICTE/REG/FDR-REL/2026/089</span></div>
+                  <div><strong>Ref No:</strong> <span className="mono">{fdrRecord.dischargeCertificateRef || `AICTE/REG/FDR-REL/2026/${(fdrRecord.fdrNumber || fdrRecord.id || '089').replace(/[^a-zA-Z0-9]/g, '').slice(-4).padStart(4, '0')}`}</span></div>
                   <div><strong>Date:</strong> 24 October 2026</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -224,7 +224,7 @@ export default function ReleaseWorkflowModal({
                   To The Branch Manager, <strong>{fdrRecord.issuingBank}</strong> ({fdrRecord.branchName}).
                 </p>
                 <p>
-                  With reference to Fixed Deposit Receipt No. <strong>{fdrRecord.fdrNumber}</strong> for the sum of <strong>₹ {fdrRecord.amount ? fdrRecord.amount.toLocaleString('en-IN') : '50,00,000'}</strong> pledged jointly in the name of <em>Member Secretary, AICTE</em> and <em>Vidyavardhaka Sangha Trust</em>, it is hereby certified that the institution has completed the requisite 10-year statutory regulatory lock-in period in strict compliance with the AICTE Approval Process Handbook.
+                  With reference to Fixed Deposit Receipt No. <strong>{fdrRecord.fdrNumber}</strong> for the sum of <strong>₹ {fdrRecord.amount ? fdrRecord.amount.toLocaleString('en-IN') : '50,00,000'}</strong> pledged jointly in the name of <em>Member Secretary, AICTE</em> and <em>{fdrRecord.institutionName || 'Applicant Educational Trust'}</em>, it is hereby certified that the institution has completed the requisite 10-year statutory regulatory lock-in period in strict compliance with the AICTE Approval Process Handbook.
                 </p>
                 <p>
                   The Competent Authority of AICTE has approved the <strong>Unconditional Discharge and Cancellation of Lien</strong> in favor of AICTE. The issuing Bank is hereby authorized to release the maturity proceeds and accumulated interest to the authorized account of the Educational Trust without further reference to this Council.
@@ -245,7 +245,7 @@ export default function ReleaseWorkflowModal({
                     <QrCode size={48} />
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--ink-muted)' }}>
-                    <div>Audit Log Ref: #1408</div>
+                    <div>Audit Log Ref: #{fdrRecord.auditBlockIndex || 4}</div>
                     <div className="mono">SHA-256: 7f83b165...9069</div>
                     <div style={{ color: 'var(--ramp-jade-text)', fontWeight: 600 }}>✓ Verified Discharge Order</div>
                   </div>
@@ -256,7 +256,7 @@ export default function ReleaseWorkflowModal({
                     Prof. Rajive Kumar
                   </div>
                   <div style={{ fontSize: 10.5, color: 'var(--ink-muted)' }}>
-                    Member Secretary, AICTE
+                    Regional Director, AICTE
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--stamp-bank-color)', marginTop: 2 }}>
                     ✓ e-Sign Digital Signature Verified
@@ -294,7 +294,8 @@ export default function ReleaseWorkflowModal({
           ) : (
             <button
               onClick={() => {
-                alert("Official AICTE FDR Discharge Certificate #AICTE/REG/FDR-REL/2026/089 exported.");
+                const refNo = fdrRecord.dischargeCertificateRef || `AICTE/REG/FDR-REL/2026/${(fdrRecord.fdrNumber || fdrRecord.id || '089').replace(/[^a-zA-Z0-9]/g, '').slice(-4).padStart(4, '0')}`;
+                alert(`Official AICTE FDR Discharge Certificate #${refNo} exported.`);
               }}
               className="btn btn-ink-primary btn-sm"
             >

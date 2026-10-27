@@ -34,6 +34,7 @@ export default function DashboardOverview({
   const expiringSoonCount = records.filter(r => r.status === "Expiring Soon" || (r.daysRemaining > 0 && r.daysRemaining <= 60)).length;
   const releasePendingCount = records.filter(r => r.status === "Release Requested").length;
   const verifiedCount = records.filter(r => r.status === "Verified & Active").length;
+  const uniqueInstitutesCount = new Set(records.map(r => r.institutionName || r.institution).filter(Boolean)).size || records.length;
 
   // Formatting helpers
   const formatCurrency = (amt) => {
@@ -125,7 +126,7 @@ export default function DashboardOverview({
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
             <TrendingUp size={12} color="var(--status-verified)" />
-            <span>Across 7 tracked technical institutes</span>
+            <span>Across {uniqueInstitutesCount} tracked technical institutes</span>
           </div>
         </div>
 
@@ -239,7 +240,7 @@ export default function DashboardOverview({
           <div className="kpi-accent-glow" style={{ background: 'var(--iris-500)' }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Release Pipeline (4-Eye)
+              Release Pipeline (Two-Officer)
             </span>
             <div style={{
               width: 32,

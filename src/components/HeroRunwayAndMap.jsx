@@ -37,6 +37,11 @@ export default function HeroRunwayAndMap({
     };
   });
 
+  // Dynamically find most critical <30-day expiring instrument
+  const criticalRecord = records.find(r => r.daysRemaining > 0 && r.daysRemaining <= 30) 
+    || records.find(r => r.status === 'Expiring Soon' || (r.daysRemaining > 0 && r.daysRemaining <= 60))
+    || records.find(r => r.daysRemaining > 0);
+
   // Regional breakdown with distinct vibrant colors
   const regions = [
     { name: "Northern", states: "UP, Delhi, Haryana, Bihar", count: records.filter(r => r.region === "Northern").length, color: "#d97706", bg: "#fef3c7", border: "#fde68a" },
@@ -172,7 +177,7 @@ export default function HeroRunwayAndMap({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ramp-vermilion-dot)', display: 'inline-block' }} />
-            <span>Critical &lt;30d window: <strong>Symbiosis PGDM (27 days left)</strong></span>
+            <span>Critical &lt;30d window: <strong>{criticalRecord ? `${criticalRecord.institutionName || criticalRecord.institution || 'Symbiosis PGDM'} (${criticalRecord.daysRemaining !== undefined ? criticalRecord.daysRemaining : 27} days left)` : 'All 30-day horizons secured'}</strong></span>
           </div>
 
           {activeMonthFilter && (

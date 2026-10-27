@@ -121,7 +121,7 @@ export default function FDRRepository({
       case 'Expiring Soon':
         return <span className="badge badge-warning"><Clock size={12} /> Expiring &lt;30d</span>;
       case 'Release Requested':
-        return <span className="badge badge-cyan"><FileText size={12} /> 4-Eye Release</span>;
+        return <span className="badge badge-cyan"><FileText size={12} /> Two-Officer Release</span>;
       case 'Rolled Over':
         return <span className="badge badge-gold"><GitBranch size={12} /> Rolled Over</span>;
       case 'Released':
@@ -405,15 +405,15 @@ export default function FDRRepository({
                         </button>
                       )}
 
-                      {/* If release requested, highlight 4-eye approval */}
+                      {/* If release requested, highlight Two-Officer approval */}
                       {item.status === 'Release Requested' && (
                         <button
                           onClick={() => onOpenReleaseWorkflow(item)}
                           className="btn btn-cyan btn-sm"
-                          title="Open 4-Eye Release & Discharge Workflow"
+                          title="Open Two-Officer Release & Discharge Workflow"
                         >
                           <FileText size={12} />
-                          <span>4-Eye Approval</span>
+                          <span>Two-Officer Approval</span>
                         </button>
                       )}
 

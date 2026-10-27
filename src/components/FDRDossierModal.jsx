@@ -333,7 +333,7 @@ export default function FDRDossierModal({
               className="btn btn-cyan"
             >
               <FileCheck2 size={14} />
-              <span>Proceed to 4-Eye Approval</span>
+              <span>Proceed to Two-Officer Approval</span>
             </button>
           )}
 

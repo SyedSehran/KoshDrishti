@@ -58,7 +58,7 @@ class TestAuditFixes(unittest.TestCase):
             "email": "director@aicte.gov.in",
             "name": "Prof. Rajive Kumar",
             "role": "director",
-            "department": "Member Secretary AICTE"
+            "department": "AICTE Regional Directorate"
         }
 
         # Kalinga user on Kalinga Institute

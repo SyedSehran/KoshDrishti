@@ -248,7 +248,7 @@ export default function DiscrepancyInspectorModal({
               rows={2}
               value={officerRemark}
               onChange={(e) => setOfficerRemark(e.target.value)}
-              placeholder="Record official observation (logged into audit log #1408)..."
+              placeholder="Record official observation (logged into cryptographic audit ledger)..."
             />
           </div>
 

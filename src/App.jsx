@@ -157,7 +157,7 @@ export default function App() {
             workflowStep: 3,
             releasedOn: new Date().toISOString().slice(0, 10),
             officerNotes: notes,
-            digitalSignatureSigner: 'Prof. Rajive Kumar, Member Secretary AICTE'
+            digitalSignatureSigner: 'Prof. Rajive Kumar, Regional Director AICTE'
           }
         };
       }
@@ -432,7 +432,7 @@ export default function App() {
             onClick={() => setIsLedgerOpen(true)}
             style={{ background: 'none', border: 'none', color: 'var(--ink-primary)', cursor: 'pointer', fontWeight: 600, fontSize: 11.5 }}
           >
-            Audit log #1408
+            Audit Ledger (Block #{ledgerChain.length > 0 ? (ledgerChain[ledgerChain.length - 1].blockIndex ?? ledgerChain.length - 1) : 0})
           </button>
           <span>•</span>
           <span>Handicap & Screen Reader Accessible</span>

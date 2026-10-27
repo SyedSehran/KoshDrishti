@@ -55,7 +55,7 @@ export default function BankGatewaySimulator({ records, onInjectDiscrepancyScena
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span className="badge badge-cyan" style={{ fontSize: 11, padding: '4px 10px' }}>
             <Radio size={12} className="pulse-dot" />
-            <span>SFMS 798 Direct Tunnel: Connected</span>
+            <span>Simulated SFMS 798 Direct Tunnel: Connected</span>
           </span>
         </div>
       </div>

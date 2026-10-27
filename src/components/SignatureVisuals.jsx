@@ -52,7 +52,7 @@ export function ExpiryChip({ days, showLabel = true }) {
 export function TrustStamp({ level = 'declared', size = 'md' }) {
   if (level === 'bank') {
     return (
-      <span className={`trust-stamp stamp-bank stamp-${size}`} title="Independently confirmed by Bank Core Banking / SFMS 798 message">
+      <span className={`trust-stamp stamp-bank stamp-${size}`} title="Independently confirmed by Bank Core Banking / Simulated SFMS 798 message">
         <ShieldCheck size={size === 'sm' ? 11 : 13} />
         <span>Bank verified</span>
       </span>

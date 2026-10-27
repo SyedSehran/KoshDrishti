@@ -4,7 +4,7 @@ import { Shield, Landmark, Building2, CheckCircle2, Search, Link2, KeyRound, Spa
 export default function Header({ currentRole, setCurrentRole, onOpenLedger, onOpenDemoGuide, searchQuery, setSearchQuery }) {
   const roles = [
     { id: 'bureau_officer', name: 'Bureau Scrutiny Officer', icon: Shield, badge: 'AICTE HQ' },
-    { id: 'director', name: 'Member Secretary / Director', icon: Landmark, badge: 'Approval Auth' },
+    { id: 'director', name: 'Regional Director Desk', icon: Landmark, badge: 'Sanction Auth' },
     { id: 'institution', name: 'Institute Nodal Officer', icon: Building2, badge: 'College Desk' },
     { id: 'bank_validator', name: 'Bank Branch Validator', icon: KeyRound, badge: 'CBS Gateway' }
   ];
@@ -157,7 +157,7 @@ export default function Header({ currentRole, setCurrentRole, onOpenLedger, onOp
             style={{ height: 36, display: 'flex', alignItems: 'center', gap: 6 }}
           >
             <Link2 size={14} />
-            <span className="mono" style={{ fontSize: 11 }}>Block #1408</span>
+            <span className="mono" style={{ fontSize: 11 }}>Audit Ledger</span>
           </button>
 
           {/* Interactive Demo Guide button */}

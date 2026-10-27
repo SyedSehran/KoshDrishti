@@ -201,7 +201,7 @@ def seed_database():
 
     demo_users = [
         ("officer@aicte.gov.in", hash_pw("officer@aicte.gov.in", "Officer@123"), "Shri Alok K. Mishra", "bureau_officer", "Regulation Bureau"),
-        ("director@aicte.gov.in", hash_pw("director@aicte.gov.in", "Director@123"), "Prof. Rajive Kumar", "director", "Member Secretary AICTE"),
+        ("director@aicte.gov.in", hash_pw("director@aicte.gov.in", "Director@123"), "Prof. Rajive Kumar", "director", "AICTE Regional Directorate"),
         ("college@kalinga.edu.in", hash_pw("college@kalinga.edu.in", "College@123"), "Dr. S. Mohanty", "institution", "Kalinga Institute Desk"),
         ("validator@sbi.co.in", hash_pw("validator@sbi.co.in", "Bank@123"), "A. K. Verma", "bank_validator", "SBI Branch Operations")
     ]
@@ -420,7 +420,7 @@ def seed_database():
             INSERT INTO alerts (fdr_id, institution_name, alert_type, days_remaining, message, status, created_at)
             VALUES 
             ('FDR-2018-1005', 'Symbiosis Institute of Business & Digital Media', 'CRITICAL_30_DAY', 27, 'Mandatory 10-Year deposit matures in 27 days. Send replacement/renewal advisory.', 'PENDING', datetime('now')),
-            ('FDR-2016-1002', 'Vidyavardhaka College of Engineering', 'MATURITY_FULFILLED', -9, '10-Year lock-in completed. Two-Officer digital discharge ready for Member Secretary approval.', 'PENDING', datetime('now')),
+            ('FDR-2016-1002', 'Vidyavardhaka College of Engineering', 'MATURITY_FULFILLED', -9, '10-Year lock-in completed. Two-Officer digital discharge ready for Regional Director approval.', 'PENDING', datetime('now')),
             ('FDR-2022-1003', '[Simulated] Apex Institute of Applied Computing', 'DISCREPANCY_ALERT', 290, 'Bank CBS mismatch: 5y tenor vs 10y mandatory APH Table 1.4 norm. AICTE lien missing.', 'PENDING', datetime('now'))
         ''')
 

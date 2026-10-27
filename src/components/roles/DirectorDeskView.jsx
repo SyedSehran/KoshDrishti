@@ -51,7 +51,7 @@ export default function DirectorDeskView({
                   Approving Authority & Directorate Chamber
                 </h2>
                 <span className="badge-clean badge-warning" style={{ fontSize: 10.5, fontWeight: 700 }}>
-                  Member Secretary AICTE
+                  Regional Director AICTE
                 </span>
               </div>
               <div style={{ fontSize: 12.5, color: 'var(--ink-secondary)', marginTop: 3 }}>
@@ -67,7 +67,7 @@ export default function DirectorDeskView({
               style={{ fontSize: 12, height: 38 }}
             >
               <FileText size={14} />
-              <span>Review Audit Log #1408</span>
+              <span>Review Regulatory Audit Ledger</span>
             </button>
             <div style={{
               padding: '6px 12px',
@@ -144,7 +144,7 @@ export default function DirectorDeskView({
               </span>
             </div>
             <div style={{ fontSize: 12, color: 'var(--ink-muted)', marginTop: 2 }}>
-              Requires Class-3 Digital Signature Certificate (DSC) from Member Secretary AICTE after scrutiny officer verification.
+              Requires Class-3 Digital Signature Certificate (DSC) from Regional Director AICTE after scrutiny officer verification.
             </div>
           </div>
         </div>

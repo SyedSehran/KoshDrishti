@@ -22,7 +22,7 @@ export default function JudgeDemoGuideModal({ onClose, onTriggerFlow }) {
       title: 'Demo Flow 2: Approaching Maturity Runway & Escalation',
       badge: 'Automated Lifecycle Tracking',
       steps: [
-        '1. Maturity runway flags Symbiosis PGDM in the critical 30-day window (27 days left).',
+        '1. Maturity runway dynamically flags instruments entering the critical 30-day window.',
         '2. System automatically generates reminder notice and prepares Regional Bureau escalation.',
         '3. Officer inspects instrument 360° drawer and dispatches multi-channel notice.'
       ],

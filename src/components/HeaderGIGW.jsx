@@ -27,10 +27,10 @@ export default function HeaderGIGW({
   });
 
   const ROLE_ACCOUNTS = {
-    bureau_officer: { email: 'officer@aicte.gov.in', pw: 'Officer@123', name: 'Shri Alok K. Mishra', role: 'bureau_officer', badge: 'Scrutiny Officer' },
-    director: { email: 'director@aicte.gov.in', pw: 'Director@123', name: 'Prof. Rajive Kumar', role: 'director', badge: 'Member Secy' },
-    institution: { email: 'college@kalinga.edu.in', pw: 'College@123', name: 'Dr. S. Mohanty', role: 'institution', badge: 'College Desk' },
-    bank_validator: { email: 'validator@sbi.co.in', pw: 'Bank@123', name: 'A. K. Verma', role: 'bank_validator', badge: 'Bank Desk' }
+    bureau_officer: { email: 'officer@aicte.gov.in', pw: 'Officer@123', name: 'Shri Alok K. Mishra', role: 'bureau_officer', badge: 'Scrutiny Officer Desk' },
+    director: { email: 'director@aicte.gov.in', pw: 'Director@123', name: 'Prof. Rajive Kumar', role: 'director', badge: 'Regional Director Desk' },
+    institution: { email: 'college@kalinga.edu.in', pw: 'College@123', name: 'Dr. S. Mohanty', role: 'institution', badge: 'College Nodal Desk' },
+    bank_validator: { email: 'validator@sbi.co.in', pw: 'Bank@123', name: 'A. K. Verma', role: 'bank_validator', badge: 'Bank Branch Desk' }
   };
 
   // Login handler using backend PyJWT auth endpoint
@@ -440,7 +440,7 @@ export default function HeaderGIGW({
             title="Open cryptographically hash-chained regulatory audit ledger"
           >
             <Shield size={13} color="var(--ink-secondary)" />
-            <span className="mono" style={{ fontSize: 11, fontWeight: 600 }}>Audit log #1408</span>
+            <span className="mono" style={{ fontSize: 11, fontWeight: 600 }}>Audit Ledger</span>
           </button>
 
           {/* Interactive Demo Scripts Button */}
@@ -484,10 +484,10 @@ export default function HeaderGIGW({
                   Select Authenticated Role (PyJWT)
                 </div>
                 {[
-                  { name: 'Shri Alok K. Mishra', roleTitle: 'Senior Scrutiny Officer', dept: 'AICTE Regulation Bureau', email: 'officer@aicte.gov.in', pw: 'Officer@123', role: 'bureau_officer', badge: 'Scrutiny Officer' },
-                  { name: 'Prof. Rajive Kumar', roleTitle: 'Member Secretary & Sanction Auth', dept: 'AICTE Directorate', email: 'director@aicte.gov.in', pw: 'Director@123', role: 'director', badge: 'Member Secy' },
-                  { name: 'Dr. S. Mohanty', roleTitle: 'College Registrar & Nodal Officer', dept: 'Kalinga Institute of Tech', email: 'college@kalinga.edu.in', pw: 'College@123', role: 'institution', badge: 'College Desk' },
-                  { name: 'A. K. Verma', roleTitle: 'Chief Manager (CBS Operations)', dept: 'State Bank of India', email: 'validator@sbi.co.in', pw: 'Bank@123', role: 'bank_validator', badge: 'Bank Desk' }
+                  { name: 'Shri Alok K. Mishra', roleTitle: 'Senior Scrutiny Officer', dept: 'AICTE Regulation Bureau', email: 'officer@aicte.gov.in', pw: 'Officer@123', role: 'bureau_officer', badge: 'Scrutiny Officer Desk' },
+                  { name: 'Prof. Rajive Kumar', roleTitle: 'Regional Director & Sanctioning Authority', dept: 'AICTE Regional Directorate', email: 'director@aicte.gov.in', pw: 'Director@123', role: 'director', badge: 'Regional Director Desk' },
+                  { name: 'Dr. S. Mohanty', roleTitle: 'College Registrar & Nodal Officer', dept: 'Kalinga Institute of Tech', email: 'college@kalinga.edu.in', pw: 'College@123', role: 'institution', badge: 'College Nodal Desk' },
+                  { name: 'A. K. Verma', roleTitle: 'Chief Manager (CBS Operations)', dept: 'State Bank of India', email: 'validator@sbi.co.in', pw: 'Bank@123', role: 'bank_validator', badge: 'Bank Branch Desk' }
                 ].map(u => (
                   <button
                     key={u.role}
@@ -567,12 +567,12 @@ export default function HeaderGIGW({
                     <Shield size={12} />
                     <span>
                       {currentUser.role === 'director'
-                        ? 'Member Secretary & Approving Authority'
+                        ? 'Regional Director & Sanctioning Authority'
                         : currentUser.role === 'institution'
-                        ? 'Technical Institution Nodal Desk'
+                        ? 'College Nodal Desk'
                         : currentUser.role === 'bank_validator'
-                        ? 'Bank Branch Verification Desk'
-                        : 'Senior Regulation Scrutiny Officer'}
+                        ? 'Bank Branch Desk'
+                        : 'Scrutiny Officer Desk'}
                     </span>
                   </div>
                   <div style={{ fontSize: 10.5, color: 'var(--ink-secondary)', marginTop: 2 }}>
@@ -654,7 +654,7 @@ export default function HeaderGIGW({
 
           {[
             { id: 'bureau_officer', icon: '🏛️', name: 'Scrutiny Officer Desk' },
-            { id: 'director', icon: '⚖️', name: 'Approving Authority (Director)' },
+            { id: 'director', icon: '⚖️', name: 'Regional Director Desk' },
             { id: 'institution', icon: '🎓', name: 'College Nodal Desk' },
             { id: 'bank_validator', icon: '🏦', name: 'Bank Branch Desk' }
           ].map(role => {

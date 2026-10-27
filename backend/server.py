@@ -563,7 +563,7 @@ def run_alert_scanner():
                             msg = f"90-day statutory advance intimation: Instrument {fdr_id} approaching end of 10-year tenor in {days_rem} days."
                         elif days_rem <= 0:
                             alert_type = "MATURITY_FULFILLED"
-                            msg = f"10-Year lock-in completed ({abs(days_rem)} days ago). Two-officer digital discharge ready for Member Secretary approval."
+                            msg = f"10-Year lock-in completed ({abs(days_rem)} days ago). Two-officer digital discharge ready for Regional Director approval."
                         
                         if alert_type:
                             c.execute("""
@@ -594,7 +594,7 @@ def run_alert_scanner():
                 # Escalation: Escalate active critical alerts unactioned for >= 3 days
                 c.execute('''
                     UPDATE alerts 
-                    SET status = 'ESCALATED', message = '[ESCALATED TO MEMBER SECRETARY] ' || message 
+                    SET status = 'ESCALATED', message = '[ESCALATED TO REGIONAL DIRECTOR] ' || message 
                     WHERE status = 'ACTIVE' 
                       AND alert_type IN ('CRITICAL_7_DAY', 'URGENT_30_DAY')
                       AND (julianday('now') - julianday(created_at)) >= 3
@@ -1642,7 +1642,7 @@ class VishwasAPIHandler(http.server.BaseHTTPRequestHandler):
                     if current_role != "director":
                         self._set_headers(403)
                         self.wfile.write(json.dumps({
-                            "error": "Forbidden: Only Member Secretary / Approving Authority (director role) can authorize final deposit release (APH Cl. 11.8)",
+                            "error": "Forbidden: Only Regional Director / Approving Authority (director role) can authorize final deposit release (APH Cl. 11.8)",
                             "code": "RELEASE_UNAUTHORIZED_ROLE"
                         }).encode('utf-8'))
                         return

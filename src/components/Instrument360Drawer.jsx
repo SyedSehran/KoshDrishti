@@ -448,7 +448,7 @@ export default function Instrument360Drawer({
 
                   <div style={{ padding: 10, background: 'var(--bg-subtle)', borderRadius: 4 }}>
                     <div style={{ color: 'var(--ink-muted)', fontSize: 11 }}>SFMS ISO20022 Status:</div>
-                    <div className="mono" style={{ fontWeight: 600, marginTop: 2 }}>ACK_701_ACCEPTED</div>
+                    <div className="mono" style={{ fontWeight: 600, marginTop: 2 }}>SIMULATED_ACK_701_ACCEPTED</div>
                   </div>
 
                   <div style={{ padding: 10, background: 'var(--bg-subtle)', borderRadius: 4 }}>
@@ -551,7 +551,7 @@ export default function Instrument360Drawer({
               }}
               className="btn btn-secondary btn-sm"
             >
-              <span>Audit Log #1408</span>
+              <span>Inspect Audit Ledger</span>
             </button>
           </div>
 
